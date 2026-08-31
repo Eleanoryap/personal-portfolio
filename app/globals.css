@@ -11,6 +11,7 @@
     background-color: var(--color-sky);
     color: var(--color-ink-body);
     font-family: var(--font-body);
+    line-height: 1.6;
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -23,10 +24,16 @@
     color: var(--color-ink);
     font-family: var(--font-display);
     font-weight: 600;
+    line-height: 1.15;
   }
 
   a {
     color: inherit;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-signal) 22%, transparent);
+    color: var(--color-ink);
   }
 
   :focus-visible {

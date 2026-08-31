@@ -1,4 +1,5 @@
 import { Container } from "@/components/Container";
+import { GutterRow } from "@/components/GutterRow";
 import { PageSection } from "@/components/PageSection";
 import { WorkManifest } from "@/components/WorkManifest";
 import { ProjectBrief } from "@/components/ProjectBrief";
@@ -14,22 +15,32 @@ export default function HomePage() {
   return (
     <main>
       <Container>
-        <header className="py-16 sm:py-24">
-          <p className="font-mono text-xs uppercase tracking-widest text-ink-muted">
-            {site.role} · {site.location}
-          </p>
-          <h1 className="mt-4 font-display text-4xl leading-tight tracking-tight text-ink sm:text-6xl">
-            {site.name}
-          </h1>
+        <header className="pt-16 pb-14 sm:pt-24 sm:pb-20">
+          <GutterRow marker="00">
+            <p className="font-mono text-xs tracking-[0.2em] text-ink-muted uppercase">
+              {site.role}
+            </p>
+            <h1 className="mt-4 font-display text-[2.5rem] leading-[1.05] tracking-tight text-ink sm:text-6xl">
+              {site.name}
+            </h1>
+            <p className="mt-5 font-mono text-xs text-ink-muted">
+              {site.location}
+            </p>
+          </GutterRow>
         </header>
 
-        <PageSection id="statement" title="Statement" hideTitle>
-          <p className="text-lg leading-relaxed text-ink-body sm:text-xl">
+        <PageSection id="statement" title="Statement" index="01" hideTitle>
+          <p className="max-w-prose text-lg leading-relaxed text-ink-body sm:text-xl">
             {site.statement}
           </p>
         </PageSection>
 
-        <PageSection id="work" title="Selected work" eyebrow="Manifest">
+        <PageSection
+          id="work"
+          title="Selected work"
+          index="02"
+          label="Manifest"
+        >
           <WorkManifest projects={projects} />
         </PageSection>
 
@@ -37,7 +48,8 @@ export default function HomePage() {
           <PageSection
             id={projectOne.slug}
             title={projectOne.name}
-            eyebrow="Project one"
+            index="03"
+            label="Case study"
           >
             <ProjectBrief project={projectOne} />
           </PageSection>
@@ -47,35 +59,46 @@ export default function HomePage() {
           <PageSection
             id={projectTwo.slug}
             title={projectTwo.name}
-            eyebrow="Project two"
+            index="04"
+            label="Case study"
           >
             <ProjectBrief project={projectTwo} />
           </PageSection>
         ) : null}
 
-        <PageSection id="reflection" title="Reflection">
-          <p className="text-ink-body">
+        <PageSection id="reflection" title="Reflection" index="05">
+          <p className="max-w-prose text-ink-body">
             Placeholder reflection. A short passage on what the work above has
             in common — a point of view on interface craft, constraints, and the
             handoff between design and engineering. Real copy comes next.
           </p>
         </PageSection>
 
-        <PageSection id="short-hops" title="Short hops" eyebrow="Side projects">
+        <PageSection
+          id="short-hops"
+          title="Short hops"
+          index="06"
+          label="Side projects"
+        >
           <ShortHops items={sideProjects} />
         </PageSection>
 
-        <PageSection id="contact" title="Contact">
-          <p className="mb-4 text-ink-body">
+        <PageSection id="contact" title="Contact" index="07">
+          <p className="mb-6 max-w-prose text-ink-body">
             Placeholder contact line. The best way to reach out and what for.
           </p>
           <ContactLinks links={site.links} />
         </PageSection>
 
         <footer className="border-t border-hairline py-10">
-          <p className="font-mono text-xs text-ink-muted">
-            © {new Date().getFullYear()} {site.name}
-          </p>
+          <GutterRow marker="—">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 font-mono text-xs text-ink-muted">
+              <span>
+                © {new Date().getFullYear()} {site.name}
+              </span>
+              <span>{site.location}</span>
+            </div>
+          </GutterRow>
         </footer>
       </Container>
     </main>
