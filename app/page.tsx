@@ -67,11 +67,7 @@ export default function HomePage() {
         ) : null}
 
         <PageSection id="reflection" title="Reflection" index="05">
-          <p className="max-w-prose text-ink-body">
-            Placeholder reflection. A short passage on what the work above has
-            in common — a point of view on interface craft, constraints, and the
-            handoff between design and engineering. Real copy comes next.
-          </p>
+          <p className="max-w-prose text-ink-body">{site.reflection}</p>
         </PageSection>
 
         <PageSection
@@ -84,9 +80,7 @@ export default function HomePage() {
         </PageSection>
 
         <PageSection id="contact" title="Contact" index="07">
-          <p className="mb-6 max-w-prose text-ink-body">
-            Placeholder contact line. The best way to reach out and what for.
-          </p>
+          <p className="mb-6 max-w-prose text-ink-body">{site.contact}</p>
           <ContactLinks links={site.links} />
         </PageSection>
 
