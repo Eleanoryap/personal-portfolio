@@ -8,16 +8,18 @@ export interface SideProject {
 
 export const sideProjects: SideProject[] = [
   {
-    name: "Placeholder Side Project",
-    year: "2025",
-    stack: ["TypeScript", "Vite"],
-    oneLiner: "Placeholder one-liner describing a small thing that was built.",
-    url: "https://example.com/placeholder",
+    name: "IsItPhishy",
+    year: "2020",
+    stack: ["JavaScript", "React", "Firebase"],
+    oneLiner:
+      "A Google Chrome extension, built with five other students, that flags phishing emails in Gmail and reports a precision score.",
+    url: "https://isitphishy.wixsite.com/website",
   },
   {
-    name: "Placeholder Experiment",
-    year: "2024",
-    stack: ["React", "Canvas"],
-    oneLiner: "Placeholder one-liner for a weekend experiment.",
+    name: "ACI Mobile Migration",
+    year: "2018",
+    stack: ["Java", "Kotlin"],
+    oneLiner:
+      "Migrated the Asian Culinary Institute's Android application from Java to Kotlin.",
   },
 ];
