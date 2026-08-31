@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
+import { GutterRow } from "@/components/GutterRow";
+import { MetaTable } from "@/components/MetaTable";
+import { SignalLink } from "@/components/SignalLink";
 import { getProject, projects } from "@/content/projects";
 import { site } from "@/content/site";
 
@@ -40,81 +42,128 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
   return (
     <main>
       <Container>
-        <p className="pt-16 font-mono text-xs">
-          <Link href="/" className="text-signal">
-            ← {site.name}
-          </Link>
-        </p>
+        <div className="border-b border-hairline py-6">
+          <GutterRow>
+            <SignalLink
+              href="/"
+              variant="bare"
+              className="font-mono text-xs tracking-[0.2em] uppercase"
+            >
+              ← Index
+            </SignalLink>
+          </GutterRow>
+        </div>
 
-        <article className="pb-24">
-          <header className="border-b border-hairline py-10">
-            <p className="font-mono text-xs uppercase tracking-widest text-ink-muted">
-              Case study
-            </p>
-            <h1 className="mt-4 font-display text-4xl leading-tight tracking-tight text-ink sm:text-5xl">
-              {project.name}
-            </h1>
-            <p className="mt-4 text-ink-body">{project.summary}</p>
+        <article>
+          <header className="border-b border-hairline py-12 sm:py-16">
+            <GutterRow marker="00">
+              <p className="font-mono text-xs tracking-[0.2em] text-ink-muted uppercase">
+                Case study
+              </p>
+              <h1 className="mt-4 font-display text-[2.25rem] leading-[1.08] tracking-tight text-ink sm:text-5xl">
+                {project.name}
+              </h1>
+              <p className="mt-5 max-w-prose text-lg text-ink-body">
+                {project.summary}
+              </p>
+            </GutterRow>
           </header>
 
-          <dl className="grid grid-cols-1 gap-y-2 border-b border-hairline py-8 font-mono text-xs text-ink-muted sm:grid-cols-[7rem_1fr] sm:gap-x-4">
-            <dt className="uppercase tracking-widest">Client</dt>
-            <dd className="text-ink-body">{project.client}</dd>
-            <dt className="uppercase tracking-widest">Years</dt>
-            <dd className="text-ink-body">{project.years}</dd>
-            <dt className="uppercase tracking-widest">Methodology</dt>
-            <dd className="text-ink-body">{project.methodology}</dd>
-            <dt className="uppercase tracking-widest">Stack</dt>
-            <dd className="text-ink-body">{project.stack.join(", ")}</dd>
-          </dl>
+          <div className="border-b border-hairline py-10">
+            <GutterRow marker="01">
+              <p className="mb-4 font-mono text-xs tracking-[0.2em] text-ink-muted uppercase">
+                Parameters
+              </p>
+              <MetaTable
+                rows={[
+                  ["Client", project.client],
+                  ["Years", project.years],
+                  ["Methodology", project.methodology],
+                  ["Stack", project.stack.join(", ")],
+                ]}
+              />
+            </GutterRow>
+          </div>
 
           {project.decisions.length > 0 ? (
             <section
               aria-labelledby="decisions-heading"
-              className="border-b border-hairline py-10"
+              className="border-b border-hairline py-12 sm:py-16"
             >
-              <h2
-                id="decisions-heading"
-                className="text-2xl tracking-tight text-ink"
-              >
-                Decisions
-              </h2>
-              <ul className="mt-6 flex flex-col gap-6">
-                {project.decisions.map((decision) => (
-                  <li key={decision.title}>
-                    <h3 className="font-display text-base text-ink">
-                      {decision.title}
-                    </h3>
-                    <p className="mt-1 text-ink-body">{decision.detail}</p>
-                  </li>
-                ))}
-              </ul>
+              <GutterRow marker="02">
+                <h2
+                  id="decisions-heading"
+                  className="font-display text-2xl tracking-tight text-ink sm:text-3xl"
+                >
+                  Decisions
+                </h2>
+                <ol className="mt-6 border-t border-hairline">
+                  {project.decisions.map((decision, index) => (
+                    <li
+                      key={decision.title}
+                      className="flex gap-4 border-b border-hairline py-5"
+                    >
+                      <span className="font-mono text-xs text-ink-muted">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="font-display text-base text-ink">
+                          {decision.title}
+                        </h3>
+                        <p className="mt-2 max-w-prose text-ink-body">
+                          {decision.detail}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </GutterRow>
             </section>
           ) : null}
 
           {project.challenges.length > 0 ? (
             <section
               aria-labelledby="challenges-heading"
-              className="border-b border-hairline py-10"
+              className="border-b border-hairline py-12 sm:py-16"
             >
-              <h2
-                id="challenges-heading"
-                className="text-2xl tracking-tight text-ink"
-              >
-                Challenges
-              </h2>
-              <ul className="mt-6 flex flex-col gap-6">
-                {project.challenges.map((challenge) => (
-                  <li key={challenge.title}>
-                    <h3 className="font-display text-base text-ink">
-                      {challenge.title}
-                    </h3>
-                    <p className="mt-1 text-ink-body">{challenge.detail}</p>
-                  </li>
-                ))}
-              </ul>
+              <GutterRow marker="03">
+                <h2
+                  id="challenges-heading"
+                  className="font-display text-2xl tracking-tight text-ink sm:text-3xl"
+                >
+                  Challenges
+                </h2>
+                <ol className="mt-6 border-t border-hairline">
+                  {project.challenges.map((challenge, index) => (
+                    <li
+                      key={challenge.title}
+                      className="flex gap-4 border-b border-hairline py-5"
+                    >
+                      <span className="font-mono text-xs text-ink-muted">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="font-display text-base text-ink">
+                          {challenge.title}
+                        </h3>
+                        <p className="mt-2 max-w-prose text-ink-body">
+                          {challenge.detail}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </GutterRow>
             </section>
           ) : null}
+
+          <div className="py-12">
+            <GutterRow>
+              <SignalLink href="/" className="font-mono text-sm">
+                ← Back to index
+              </SignalLink>
+            </GutterRow>
+          </div>
         </article>
       </Container>
     </main>
