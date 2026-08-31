@@ -1,0 +1,24 @@
+/**
+ * Design tokens. Placeholders — these values will change.
+ * Components must reference the token (Tailwind theme utility or var()),
+ * never a raw hex or font family name.
+ *
+ * Font source variables (--font-*-src) are provided by next/font in
+ * app/layout.tsx. Swapping a typeface means changing the import there
+ * and, if the source variable is renamed, the one line below.
+ */
+
+@theme {
+  --color-sky: #e9eef3;
+  --color-plate: #f4f7fa;
+  --color-paper: #fcfdfe;
+  --color-ink: #111820;
+  --color-ink-body: #4a5560;
+  --color-ink-muted: #7a8794;
+  --color-hairline: #c7d1db;
+  --color-signal: #e2662b;
+
+  --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-src), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-src), ui-monospace, "SFMono-Regular", monospace;
+}
