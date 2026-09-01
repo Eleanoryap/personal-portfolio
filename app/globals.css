@@ -55,10 +55,6 @@
     /* Failsafe: reveal the page even if the controller never runs. */
     animation: loader-failsafe 0s linear 3.4s forwards;
   }
-  .loader.is-done {
-    opacity: 0;
-    pointer-events: none;
-  }
   .loader__bar {
     width: 22ch;
     overflow: hidden;
@@ -262,19 +258,16 @@
     }
   }
 
-  /* ---- The path (homepage scroll progress) -------------------- */
+  /* ---- The path (homepage flight path) ----------------------- */
   .path {
-    position: fixed;
-    left: 10px;
-    top: 116px;
-    bottom: 56px;
-    width: 44px;
-    z-index: 55;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.8s ease 0.3s;
   }
-  :root[data-scrolled] .path {
+  :root[data-loaded] .path {
     opacity: 1;
   }
   .path svg {
@@ -287,6 +280,7 @@
     fill: none;
     stroke: var(--color-hairline);
     stroke-width: 1;
+    opacity: 0.55;
   }
   .path__trace {
     fill: none;
@@ -305,6 +299,8 @@
 
   /* ---- Document column ---------------------------------------- */
   .doc {
+    position: relative;
+    z-index: 1;
     max-width: 36rem;
     margin: 0 auto;
     padding: 0 1.5rem;
@@ -475,6 +471,9 @@
     .hero-cue__chev,
     .loader__bar {
       animation: none;
+    }
+    .path {
+      display: none;
     }
     .doc--hero {
       padding-top: 6.5rem;

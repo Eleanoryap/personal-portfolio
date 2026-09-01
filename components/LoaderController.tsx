@@ -3,9 +3,11 @@
 import { useEffect } from "react";
 
 /**
- * Dismisses the server-rendered #loader overlay once fonts are ready and a
- * short minimum has passed, so it never merely flashes. A CSS animation on
- * .loader is the failsafe if this never runs.
+ * Fades out the server-rendered #loader once fonts are ready and a short
+ * minimum has passed, so it never merely flashes, and signals the page has
+ * loaded (which triggers the hero name's entrance). The overlay is hidden,
+ * not removed — it's React-owned markup. A CSS animation on .loader is the
+ * failsafe if this never runs.
  */
 export function LoaderController() {
   useEffect(() => {
@@ -16,13 +18,17 @@ export function LoaderController() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    let removed = false;
+    let done = false;
     const finish = () => {
-      if (removed) return;
-      removed = true;
-      el.classList.add("is-done");
+      if (done) return;
+      done = true;
+      el.style.opacity = "0";
+      el.style.pointerEvents = "none";
       document.documentElement.setAttribute("data-loaded", "");
-      window.setTimeout(() => el.remove(), 450);
+      window.setTimeout(() => {
+        el.style.visibility = "hidden";
+        el.setAttribute("aria-hidden", "true");
+      }, 450);
     };
 
     const minWait = new Promise<void>((resolve) =>

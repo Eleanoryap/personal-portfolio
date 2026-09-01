@@ -29,8 +29,9 @@ export const metadata: Metadata = {
   description: site.statement,
 };
 
-// Runs before first paint. Dark is the default; light is opt-in and persisted.
-const themeInit = `(function(){try{var t=localStorage.getItem("theme");document.documentElement.dataset.theme=(t==="light"||t==="dark")?t:"dark"}catch(e){document.documentElement.dataset.theme="dark"}})()`;
+// Inline so it runs before first paint. Dark is the default; light is an
+// opt-in persisted by the toggle.
+const themeInit = `(function(){try{var t=localStorage.getItem("theme");document.documentElement.dataset.theme=(t==="light"||t==="dark")?t:"dark"}catch(e){document.documentElement.dataset.theme="dark"}})();`;
 
 export default function RootLayout({
   children,
@@ -51,6 +52,7 @@ export default function RootLayout({
           </span>
         </div>
         <LoaderController />
+
         {children}
       </body>
     </html>
