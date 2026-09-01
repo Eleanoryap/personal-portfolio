@@ -270,7 +270,7 @@
   :root[data-loaded] .path {
     opacity: 1;
   }
-  .path svg {
+  .path > svg {
     display: block;
     width: 100%;
     height: 100%;
@@ -289,6 +289,23 @@
     stroke-linecap: round;
   }
   .path__plane {
+    position: absolute;
+    width: 22px;
+    height: 18px;
+    margin: 0;
+    transform-origin: 50% 50%;
+    will-change: transform, top, left;
+    filter: drop-shadow(
+      0 0 2px color-mix(in srgb, var(--color-signal) 45%, transparent)
+    );
+  }
+  .path__plane svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .path__plane path {
     fill: var(--color-signal);
   }
   @media (max-width: 63.99rem) {

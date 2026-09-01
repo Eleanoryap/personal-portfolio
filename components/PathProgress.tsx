@@ -20,22 +20,29 @@ function smoothPath(pts: Array<{ x: number; y: number }>) {
   return d;
 }
 
+const DEG = 180 / Math.PI;
 const CONTENT_W = 576; // .doc max-width (36rem)
 const SAMPLES = 260;
 
+function norm(a: number) {
+  while (a > Math.PI) a -= 2 * Math.PI;
+  while (a < -Math.PI) a += 2 * Math.PI;
+  return a;
+}
+
 /**
- * A flight path routed through the whole homepage — starting level beside the
- * name, then weaving down the left and right margins. A plane marker rides it
- * as the reader scrolls, staying in view and banking to the path's tangent,
- * while the traced portion fills with the signal colour. Desktop only; hidden
- * under reduced motion. Future: swap the 2-D plane for a 3-D model.
+ * A flight path routed through the whole homepage — starting below the name,
+ * then weaving down the left and right margins, crossing the content only at
+ * the terminal rules. A plane rides a scroll-linked position, banking into the
+ * curves with a CSS pseudo-3-D tilt, and the trace fills behind it. Desktop
+ * only; hidden under reduced motion. Future: a real 3-D model.
  */
 export function PathProgress() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const trackRef = useRef<SVGPathElement>(null);
   const traceRef = useRef<SVGPathElement>(null);
-  const planeRef = useRef<SVGGElement>(null);
+  const planeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -47,6 +54,7 @@ export function PathProgress() {
 
     let len = 0;
     let samples: Array<{ x: number; y: number; l: number }> = [];
+    let bank = 0; // eased, degrees
 
     const build = () => {
       const w = window.innerWidth;
@@ -105,7 +113,6 @@ export function PathProgress() {
       const vh = window.innerHeight;
       const max = document.documentElement.scrollHeight - vh;
       const prog = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      // Sits on the path start below the name, drifting toward the foot.
       const targetY = window.scrollY + vh * (0.62 + 0.3 * prog);
 
       let i = 0;
@@ -115,13 +122,23 @@ export function PathProgress() {
       const t = b.y !== a.y ? (targetY - a.y) / (b.y - a.y) : 0;
       const x = a.x + (b.x - a.x) * t;
       const l = a.l + (b.l - a.l) * t;
-      const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+
+      // heading (forward tangent) and how hard the path is turning
+      const before = samples[Math.max(0, i - 3)];
+      const after = samples[Math.min(samples.length - 1, i + 3)];
+      const t1 = Math.atan2(a.y - before.y, a.x - before.x);
+      const t2 = Math.atan2(after.y - b.y, after.x - b.x);
+      const heading = t2 * DEG;
+      const turn = norm(t2 - t1) * DEG;
+      const targetBank = Math.max(-32, Math.min(32, turn * 1.6));
+      bank += (targetBank - bank) * 0.12; // ease
 
       trace.style.strokeDashoffset = `${len - l}`;
-      plane.setAttribute(
-        "transform",
-        `translate(${x} ${targetY}) rotate(${angle})`,
-      );
+      plane.style.left = `${x}px`;
+      plane.style.top = `${targetY}px`;
+      plane.style.transform =
+        `translate(-50%, -50%) perspective(460px) rotateX(15deg) ` +
+        `rotateZ(${heading}deg) rotateY(${bank}deg)`;
     };
 
     const onScroll = () => {
@@ -153,10 +170,12 @@ export function PathProgress() {
       <svg ref={svgRef} fill="none" preserveAspectRatio="none">
         <path ref={trackRef} className="path__track" />
         <path ref={traceRef} className="path__trace" />
-        <g ref={planeRef} className="path__plane">
-          <path d="M 8 0 L -7 -5 L -3 0 L -7 5 Z" />
-        </g>
       </svg>
+      <div className="path__plane" ref={planeRef}>
+        <svg viewBox="-11 -9 22 18">
+          <path d="M 9 0 L -3 -2.4 L -9 -7.5 L -6.5 -1.7 L -9 0 L -6.5 1.7 L -9 7.5 L -3 2.4 Z" />
+        </svg>
+      </div>
     </div>
   );
 }
