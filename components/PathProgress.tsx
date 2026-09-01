@@ -70,8 +70,9 @@ export function PathProgress() {
 
     let len = 0;
     let samples: Array<{ x: number; y: number; l: number }> = [];
-    let bank = 0; // eased, degrees
+    let bank = 0; // eased roll, degrees — 0 upright, 180 when doubled back left
     let heading = 0; // eased, radians — 0 (level) until the reader flies it
+    let facingLeft = false; // hysteretic: which way the route last committed
     let mesh: FlightPlaneController | null = null;
 
     const build = () => {
@@ -148,10 +149,16 @@ export function PathProgress() {
       const after = samples[Math.min(samples.length - 1, i + 4)];
       const t2 = Math.atan2(after.y - b.y, after.x - b.x);
 
-      // nose follows the path (level at rest); never rolls
+      // nose follows the path (level at rest). Where the route doubles back
+      // to the left, roll 180° about the nose so the plane stays right-side-up
+      // instead of hanging inverted.
       const targetHeading = flying ? t2 : 0;
       heading += norm(targetHeading - heading) * 0.12;
-      bank += (0 - bank) * 0.12;
+      // hysteresis so a near-vertical straightaway (cos ≈ 0) doesn't flip-flop
+      if (Math.cos(t2) < -0.25) facingLeft = true;
+      else if (Math.cos(t2) > 0.25) facingLeft = false;
+      const targetRoll = flying && facingLeft ? 180 : 0;
+      bank += (targetRoll - bank) * 0.12;
 
       // large and near at the top, shrinking away into the distance
       const scale = 3 - 1.5 * prog;
@@ -169,13 +176,18 @@ export function PathProgress() {
       } else {
         plane.style.left = `${x}px`;
         plane.style.top = `${targetY}px`;
+        // the fallback marker is symmetric top-to-bottom, so heading alone
+        // reads correctly whichever way it flies — no roll needed
         plane.style.transform =
           `translate(-50%, -50%) scale(${scale.toFixed(3)}) ` +
           `perspective(560px) rotateX(13deg) ` +
-          `rotateZ(${heading * DEG}deg) rotateY(${bank}deg)`;
+          `rotateZ(${heading * DEG}deg)`;
       }
 
-      return Math.abs(heading - targetHeading) > 0.004 || Math.abs(bank) > 0.05;
+      return (
+        Math.abs(norm(targetHeading - heading)) > 0.004 ||
+        Math.abs(targetRoll - bank) > 0.1
+      );
     };
 
     let raf = 0;
