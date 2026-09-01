@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createFlightPlane, type FlightPlaneController } from "./flightScene";
 
 /**
  * Catmull-Rom through the points as cubic beziers, with each control point's
@@ -37,12 +38,18 @@ function norm(a: number) {
   return a;
 }
 
+function signal() {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-signal")
+    .trim();
+}
+
 /**
  * A flight path routed through the whole homepage — starting below the name,
  * then weaving down the left and right margins, crossing the content only at
  * the terminal rules. A plane rides a scroll-linked position, banking into the
- * curves with a CSS pseudo-3-D tilt, and the trace fills behind it. Desktop
- * only; hidden under reduced motion. Future: a real 3-D model.
+ * curves; where WebGL is available it's a real 3-D mesh, otherwise a CSS
+ * pseudo-3-D marker. Desktop only; hidden under reduced motion.
  */
 export function PathProgress() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -50,6 +57,7 @@ export function PathProgress() {
   const trackRef = useRef<SVGPathElement>(null);
   const traceRef = useRef<SVGPathElement>(null);
   const planeRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -57,11 +65,13 @@ export function PathProgress() {
     const track = trackRef.current;
     const trace = traceRef.current;
     const plane = planeRef.current;
-    if (!wrap || !svg || !track || !trace || !plane) return;
+    const canvas = canvasRef.current;
+    if (!wrap || !svg || !track || !trace || !plane || !canvas) return;
 
     let len = 0;
     let samples: Array<{ x: number; y: number; l: number }> = [];
     let bank = 0; // eased, degrees
+    let mesh: FlightPlaneController | null = null;
 
     const build = () => {
       // clientWidth, not innerWidth — the SVG renders inside the scrollbar,
@@ -113,6 +123,8 @@ export function PathProgress() {
         const pt = track.getPointAtLength(l);
         samples.push({ x: pt.x, y: pt.y, l });
       }
+
+      mesh?.setViewport(w, vh);
     };
 
     let ticking = false;
@@ -137,21 +149,31 @@ export function PathProgress() {
       const after = samples[Math.min(samples.length - 1, i + 3)];
       const t1 = Math.atan2(a.y - before.y, a.x - before.x);
       const t2 = Math.atan2(after.y - b.y, after.x - b.x);
-      const heading = t2 * DEG;
       const turn = norm(t2 - t1) * DEG;
       const targetBank = Math.max(-32, Math.min(32, turn * 1.6));
       bank += (targetBank - bank) * 0.12; // ease
 
       // large and near at the top, shrinking away into the distance
-      const scale = 1.45 - 0.85 * prog;
+      const scale = 3 - 1.5 * prog;
 
       trace.style.strokeDashoffset = `${len - l}`;
-      plane.style.left = `${x}px`;
-      plane.style.top = `${targetY}px`;
-      plane.style.transform =
-        `translate(-50%, -50%) scale(${scale.toFixed(3)}) ` +
-        `perspective(560px) rotateX(13deg) ` +
-        `rotateZ(${heading}deg) rotateY(${bank}deg)`;
+
+      if (mesh) {
+        mesh.update({
+          x,
+          y: targetY - window.scrollY,
+          heading: t2,
+          bank: bank / DEG,
+          scale,
+        });
+      } else {
+        plane.style.left = `${x}px`;
+        plane.style.top = `${targetY}px`;
+        plane.style.transform =
+          `translate(-50%, -50%) scale(${scale.toFixed(3)}) ` +
+          `perspective(560px) rotateX(13deg) ` +
+          `rotateZ(${t2 * DEG}deg) rotateY(${bank}deg)`;
+      }
     };
 
     const onScroll = () => {
@@ -163,18 +185,33 @@ export function PathProgress() {
       build();
       update();
     };
+    const onTheme = () => mesh?.setColor(signal());
 
     build();
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", rebuild, { passive: true });
+    window.addEventListener("themechange", onTheme);
     if (document.fonts?.ready) document.fonts.ready.then(rebuild);
     const settle = window.setTimeout(rebuild, 600);
 
+    // Upgrade to a real 3-D plane once three.js has loaded.
+    let cancelled = false;
+    createFlightPlane(canvas).then((ctrl) => {
+      if (cancelled || !ctrl) return;
+      mesh = ctrl;
+      ctrl.setColor(signal());
+      wrap.classList.add("path--3d");
+      rebuild();
+    });
+
     return () => {
+      cancelled = true;
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", rebuild);
+      window.removeEventListener("themechange", onTheme);
       window.clearTimeout(settle);
+      mesh?.dispose();
     };
   }, []);
 
@@ -184,6 +221,7 @@ export function PathProgress() {
         <path ref={trackRef} className="path__track" />
         <path ref={traceRef} className="path__trace" />
       </svg>
+      <canvas ref={canvasRef} className="path__canvas" />
       <div className="path__plane" ref={planeRef}>
         <svg viewBox="-11 -9 22 18">
           <path d="M 9 0 L -3 -2.4 L -9 -7.5 L -6.5 -1.7 L -9 0 L -6.5 1.7 L -9 7.5 L -3 2.4 Z" />
