@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { site } from "@/content/site";
+import { createNameBlocks, type NameBlocksController } from "./nameScene";
 import { ThemeToggle } from "./ThemeToggle";
+
+function inkColor() {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-ink")
+    .trim();
+}
 
 const NAV = [
   { href: "#statement", label: "Statement" },
@@ -20,6 +27,8 @@ const NAV = [
  * corner state is set immediately and nothing animates.
  */
 export function HomeChrome() {
+  const nameCanvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
     const root = document.documentElement;
     const reduce = window.matchMedia(
@@ -34,10 +43,27 @@ export function HomeChrome() {
     // Arm the name entrance (it hides behind the loader, then reveals).
     root.setAttribute("data-intro", "");
 
+    // ---- 3-D block name (desktop, WebGL, motion-OK only) ----------
+    let name: NameBlocksController | null = null;
+    let raf = 0;
+    let cancelled = false;
+    const frame = () => {
+      raf = name && name.render() ? requestAnimationFrame(frame) : 0;
+    };
+    const kick = () => {
+      if (name && !raf) raf = requestAnimationFrame(frame);
+    };
+
+    let scrolled = false;
     let ticking = false;
     const update = () => {
       const past = window.scrollY > Math.min(window.innerHeight * 0.25, 180);
       root.toggleAttribute("data-scrolled", past);
+      if (past !== scrolled) {
+        scrolled = past;
+        if (past) name?.setPointer(0, 0); // settle before it fades
+        kick();
+      }
       ticking = false;
     };
     const onScroll = () => {
@@ -45,18 +71,66 @@ export function HomeChrome() {
       ticking = true;
       requestAnimationFrame(update);
     };
+    const onPointerMove = (e: PointerEvent) => {
+      if (scrolled || !name) return;
+      name.setPointer(
+        (e.clientX / window.innerWidth) * 2 - 1,
+        (e.clientY / window.innerHeight) * 2 - 1,
+      );
+      kick();
+    };
+    const onResize = () => {
+      name?.setViewport(window.innerWidth, window.innerHeight);
+      kick();
+    };
+    const onTheme = () => {
+      name?.setColor(inkColor());
+      kick();
+    };
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
+
+    const canvas = nameCanvasRef.current;
+    if (canvas && window.matchMedia("(min-width: 64rem)").matches) {
+      createNameBlocks(canvas, site.name)
+        .then((ctrl) => {
+          if (!ctrl) return;
+          if (cancelled) {
+            ctrl.dispose();
+            return;
+          }
+          name = ctrl;
+          ctrl.setColor(inkColor());
+          ctrl.setViewport(window.innerWidth, window.innerHeight);
+          root.setAttribute("data-name3d", "");
+          kick();
+          window.addEventListener("pointermove", onPointerMove, {
+            passive: true,
+          });
+          window.addEventListener("resize", onResize, { passive: true });
+          window.addEventListener("themechange", onTheme);
+        })
+        .catch(() => {});
+    }
+
     return () => {
+      cancelled = true;
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("themechange", onTheme);
+      if (raf) cancelAnimationFrame(raf);
+      name?.dispose();
       root.removeAttribute("data-scrolled");
       root.removeAttribute("data-intro");
+      root.removeAttribute("data-name3d");
     };
   }, []);
 
   return (
     <>
+      <canvas className="brand-canvas" ref={nameCanvasRef} aria-hidden="true" />
       <h1 className="brand brand--home">{site.name}</h1>
 
       <div className="chrome chrome--home">

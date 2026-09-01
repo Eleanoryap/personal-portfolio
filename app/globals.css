@@ -316,6 +316,34 @@
       0 0 16px 12px var(--color-sky);
   }
 
+  /* ---- 3-D block name (hero only) ------------------------------ */
+  /* A WebGL canvas over the first screen renders the name as extruded
+     blocks. HomeChrome sets [data-name3d] once it's live; it fades in with
+     the loader and out again on first scroll, handing back to the flat
+     .brand--home that then travels to the corner. */
+  .brand-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 61;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  :root[data-name3d][data-loaded]:not([data-scrolled]) .brand-canvas {
+    opacity: 1;
+  }
+  /* while the blocks are up, keep the flat name for a11y but out of sight */
+  :root[data-name3d]:not([data-scrolled]) .brand--home {
+    opacity: 0;
+  }
+  @media (max-width: 63.99rem) {
+    .brand-canvas {
+      display: none;
+    }
+  }
+
   /* ---- Scroll cue ---------------------------------------------- */
   .hero-cue {
     position: fixed;
@@ -612,7 +640,8 @@
     .loader__bar {
       animation: none;
     }
-    .path {
+    .path,
+    .brand-canvas {
       display: none;
     }
     .doc--hero {
