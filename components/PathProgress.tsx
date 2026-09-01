@@ -55,7 +55,8 @@ export function PathProgress() {
 
       const leftX = Math.max(28, (w - CONTENT_W) / 2 - 44);
       const rightX = Math.min(w - 28, (w + CONTENT_W) / 2 + 44);
-      const nameY = vh * 0.42;
+      // Start well below the name so the two don't crowd each other.
+      const startY = vh * 0.62;
 
       // Cross the content only where a terminal rule sits (low text density);
       // hug a margin between the crossings.
@@ -67,11 +68,11 @@ export function PathProgress() {
           const r = el.getBoundingClientRect();
           return r.top + window.scrollY + r.height / 2;
         })
-        .filter((y) => y > nameY + 80 && y < h - 40);
+        .filter((y) => y > startY + 60 && y < h - 40);
 
       const pts: Array<{ x: number; y: number }> = [
-        { x: w / 2 - 120, y: nameY },
-        { x: w / 2 + 40, y: nameY + 4 }, // level departure beside the name
+        { x: w / 2 - 120, y: startY },
+        { x: w / 2 + 40, y: startY + 4 }, // level departure below the name
       ];
       let onLeft = true;
       for (const cy of crossings) {
@@ -104,7 +105,8 @@ export function PathProgress() {
       const vh = window.innerHeight;
       const max = document.documentElement.scrollHeight - vh;
       const prog = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      const targetY = window.scrollY + vh * (0.4 + 0.52 * prog);
+      // Sits on the path start below the name, drifting toward the foot.
+      const targetY = window.scrollY + vh * (0.62 + 0.3 * prog);
 
       let i = 0;
       while (i < samples.length - 2 && samples[i + 1].y < targetY) i++;
