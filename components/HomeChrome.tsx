@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { site } from "@/content/site";
 import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
-  { id: "statement", label: "Statement" },
-  { id: "work", label: "Work" },
-  { id: "reflection", label: "Reflection" },
-  { id: "contact", label: "Contact" },
+  { href: "#statement", label: "Statement" },
+  { href: "#work", label: "Work" },
+  { href: "#reflection", label: "Reflection" },
+  { href: "#contact", label: "Contact" },
+  { href: "/about", label: "About" },
 ];
 
 /**
@@ -62,11 +64,17 @@ export function HomeChrome() {
           className="chrome__fx chrome__fx--tr chrome__nav"
           aria-label="Sections"
         >
-          {NAV.map((item) => (
-            <a key={item.id} href={`#${item.id}`}>
-              {item.label}
-            </a>
-          ))}
+          {NAV.map((item) =>
+            item.href.startsWith("/") ? (
+              <Link key={item.href} href={item.href}>
+                {item.label}
+              </Link>
+            ) : (
+              <a key={item.href} href={item.href}>
+                {item.label}
+              </a>
+            ),
+          )}
         </nav>
 
         <p className="chrome__fx chrome__fx--bl">{site.location}</p>

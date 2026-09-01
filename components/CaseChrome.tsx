@@ -1,17 +1,18 @@
-import Link from "next/link";
-import { ThemeToggle } from "./ThemeToggle";
+import { PageChrome } from "./PageChrome";
 import { site } from "@/content/site";
 
 interface CaseChromeProps {
   projectName: string;
   client: string;
   years: string;
-  /** 1-based position, e.g. { index: 1, total: 2 } */
+  /** 1-based position in the work list. */
   index: number;
   total: number;
 }
 
-/** Static corner furniture for a case study — no hero, no travel. */
+const pos = (n: number) => String(n).padStart(2, "0");
+
+/** Corner furniture for a case study — back to the work index. */
 export function CaseChrome({
   projectName,
   client,
@@ -19,32 +20,28 @@ export function CaseChrome({
   index,
   total,
 }: CaseChromeProps) {
-  const pos = (n: number) => String(n).padStart(2, "0");
-
   return (
-    <div className="chrome chrome--case">
-      <p className="brand brand--case">
-        <Link href="/">← {site.name}</Link>
-      </p>
-
-      <p className="chrome__fx chrome__fx--tr">
-        {projectName}
-        <br />
-        Case study
-      </p>
-
-      <p className="chrome__fx chrome__fx--bl">
-        {client}
-        <br />
-        {years}
-      </p>
-
-      <div className="chrome__fx chrome__fx--br flex flex-col items-end gap-1.5">
-        <span className="chrome__meta">
+    <PageChrome
+      back={{ href: "/work", label: site.name }}
+      topRight={
+        <>
+          {projectName}
+          <br />
+          Case study
+        </>
+      }
+      bottomLeft={
+        <>
+          {client}
+          <br />
+          {years}
+        </>
+      }
+      meta={
+        <>
           {pos(index)} / {pos(total)}
-        </span>
-        <ThemeToggle />
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }
