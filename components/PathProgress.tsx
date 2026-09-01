@@ -142,11 +142,15 @@ export function PathProgress() {
       const targetBank = Math.max(-32, Math.min(32, turn * 1.6));
       bank += (targetBank - bank) * 0.12; // ease
 
+      // large and near at the top, shrinking away into the distance
+      const scale = 1.45 - 0.85 * prog;
+
       trace.style.strokeDashoffset = `${len - l}`;
       plane.style.left = `${x}px`;
       plane.style.top = `${targetY}px`;
       plane.style.transform =
-        `translate(-50%, -50%) perspective(560px) rotateX(13deg) ` +
+        `translate(-50%, -50%) scale(${scale.toFixed(3)}) ` +
+        `perspective(560px) rotateX(13deg) ` +
         `rotateZ(${heading}deg) rotateY(${bank}deg)`;
     };
 
