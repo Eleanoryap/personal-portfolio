@@ -282,16 +282,6 @@
     box-shadow:
       0 0 0 14px var(--color-sky),
       0 0 34px 26px var(--color-sky);
-    /* extruded block faces, em-scaled so they track the size change */
-    text-shadow:
-      0.02em 0.02em 0 var(--color-ink-muted),
-      0.04em 0.04em 0 var(--color-ink-muted),
-      0.06em 0.06em 0 var(--color-ink-muted),
-      0.08em 0.08em 0 var(--color-ink-muted),
-      0.1em 0.1em 0 var(--color-ink-muted),
-      0.12em 0.12em 0 var(--color-ink-muted),
-      0.14em 0.14em 0.02em var(--color-ink-muted),
-      0.17em 0.17em 0.35em rgba(0, 0, 0, 0.45);
     transform-origin: top left;
     /* rest position = centred: shift the top-left corner by
        (half viewport − corner offset − half element). */
