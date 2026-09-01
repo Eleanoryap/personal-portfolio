@@ -2,7 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-/** Catmull-Rom through the points, emitted as cubic beziers. */
+/**
+ * Catmull-Rom through the points as cubic beziers, with each control point's
+ * y clamped to its segment's y-range so the whole path stays monotonic in y
+ * (the marker is placed by searching y, so a backward bulge would misplace it).
+ */
 function smoothPath(pts: Array<{ x: number; y: number }>) {
   if (pts.length < 2) return "";
   let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -12,9 +16,12 @@ function smoothPath(pts: Array<{ x: number; y: number }>) {
     const p2 = pts[i + 1];
     const p3 = pts[i + 2] ?? p2;
     const c1x = p1.x + (p2.x - p0.x) / 6;
-    const c1y = p1.y + (p2.y - p0.y) / 6;
     const c2x = p2.x - (p3.x - p1.x) / 6;
-    const c2y = p2.y - (p3.y - p1.y) / 6;
+    const lo = Math.min(p1.y, p2.y);
+    const hi = Math.max(p1.y, p2.y);
+    const clamp = (v: number) => Math.max(lo, Math.min(hi, v));
+    const c1y = clamp(p1.y + (p2.y - p0.y) / 6);
+    const c2y = clamp(p2.y - (p3.y - p1.y) / 6);
     d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
   }
   return d;
@@ -57,7 +64,9 @@ export function PathProgress() {
     let bank = 0; // eased, degrees
 
     const build = () => {
-      const w = window.innerWidth;
+      // clientWidth, not innerWidth — the SVG renders inside the scrollbar,
+      // so its user units must map 1:1 to the plane's CSS pixels.
+      const w = wrap.clientWidth;
       const h = Math.max(1, wrap.clientHeight);
       const vh = window.innerHeight;
 
@@ -137,7 +146,7 @@ export function PathProgress() {
       plane.style.left = `${x}px`;
       plane.style.top = `${targetY}px`;
       plane.style.transform =
-        `translate(-50%, -50%) perspective(460px) rotateX(15deg) ` +
+        `translate(-50%, -50%) perspective(560px) rotateX(13deg) ` +
         `rotateZ(${heading}deg) rotateY(${bank}deg)`;
     };
 
