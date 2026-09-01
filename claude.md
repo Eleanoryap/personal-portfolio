@@ -13,15 +13,30 @@ ESLint + Prettier
 
 Architecture:
 
-- Design tokens live in app/tokens.css and feed Tailwind's @theme.
-  Components reference token-backed utilities (bg-sky, text-ink, ...)
-  or var(--color-*) — never a raw hex or font family name.
-- Fonts load via next/font in app/layout.tsx and expose
-  --font-*-src variables that tokens.css maps to --font-display/body/mono.
+- Design tokens live in app/tokens.css. The @theme block holds the light
+  palette and generates the utilities; dark values are re-pointed for
+  prefers-color-scheme and for an explicit [data-theme]. Components
+  reference token-backed utilities (bg-sky, text-ink, ...) or var(--color-*)
+  — never a raw hex or font family name. Blueprint-specific styles
+  (chrome, hero, manifesto, terminal rule, blueprint strip) live in the
+  @layer components block of app/globals.css.
+- Fonts load via next/font in app/layout.tsx and expose --font-*-src
+  variables that tokens.css maps to --font-display/body/mono.
+- Theme: an inline script in <head> applies the stored choice before
+  paint; ThemeToggle flips [data-theme] and persists to localStorage.
 - All copy lives in typed data files under content/, never inline in JSX:
   content/site.ts, content/projects.ts, content/sideProjects.ts.
-- Routes: / (homepage, one continuous scrolling document),
-  /work/[slug] (case study rendered from content/projects.ts).
+- Design direction: monospace-forward, near-monochrome with the signal
+  accent used sparingly, name/metadata pinned to the viewport corners
+  (a solid top bar under 40rem). Prose is Inter; labels and data are mono.
+- Motion is limited and deliberate: a loading screen, the hero name
+  settling from centre to corner on first scroll. All of it collapses
+  under prefers-reduced-motion. No scroll-driven effects beyond that.
+- Routes: / (homepage — a hero screen then one continuous scrolling
+  document), /work/[slug] (case study rendered from content/projects.ts).
+- Key components: HomeChrome / CaseChrome (corner furniture), Section +
+  SectionLabel, TerminalRule, BlueprintStrip, WorkManifest, ProjectBrief,
+  MetaTable, ShortHops, ContactLinks, SignalLink.
 
 Principles:
 

@@ -1,12 +1,15 @@
 # personal-portfolio
 
-Personal portfolio site. Static foundation — no animation, scroll effects, or
-page transitions yet.
+Eleanor Yap's personal portfolio. Monospace-forward, near-monochrome, with
+viewport-corner furniture and a light/dark toggle. Content is static and
+server-rendered; the only motion is the loading screen and the hero name
+settling into the corner on first scroll (both disabled under
+`prefers-reduced-motion`).
 
 ## Stack
 
 - Next.js (App Router) + TypeScript
-- Tailwind CSS v4 (CSS-first theme via `app/tokens.css`)
+- Tailwind CSS v4 (CSS-first theme via `app/tokens.css`, light + dark)
 - ESLint + Prettier
 
 ## Develop
