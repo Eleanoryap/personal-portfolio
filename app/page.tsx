@@ -1,6 +1,6 @@
-import { Container } from "@/components/Container";
-import { GutterRow } from "@/components/GutterRow";
-import { PageSection } from "@/components/PageSection";
+import { HomeChrome } from "@/components/HomeChrome";
+import { Section } from "@/components/Section";
+import { TerminalRule } from "@/components/TerminalRule";
 import { WorkManifest } from "@/components/WorkManifest";
 import { ProjectBrief } from "@/components/ProjectBrief";
 import { ShortHops } from "@/components/ShortHops";
@@ -13,88 +13,65 @@ export default function HomePage() {
   const [projectOne, projectTwo] = projects;
 
   return (
-    <main>
-      <Container>
-        <header className="pt-16 pb-14 sm:pt-24 sm:pb-20">
-          <GutterRow marker="00">
-            <p className="font-mono text-xs tracking-[0.2em] text-ink-muted uppercase">
-              {site.role}
-            </p>
-            <h1 className="mt-4 font-display text-[2.5rem] leading-[1.05] tracking-tight text-ink sm:text-6xl">
-              {site.name}
-            </h1>
-            <p className="mt-5 font-mono text-xs text-ink-muted">
-              {site.location}
-            </p>
-          </GutterRow>
-        </header>
+    <>
+      <HomeChrome />
 
-        <PageSection id="statement" title="Statement" index="01" hideTitle>
-          <p className="max-w-prose text-lg leading-relaxed text-ink-body sm:text-xl">
-            {site.statement}
-          </p>
-        </PageSection>
+      <main className="doc doc--hero pb-[28vh]">
+        <Section id="statement" label="Statement" title="Statement" hideTitle>
+          <p className="manifesto">{site.statement}</p>
+        </Section>
 
-        <PageSection
-          id="work"
-          title="Selected work"
-          index="02"
-          label="Manifest"
-        >
+        <TerminalRule />
+
+        <Section id="work" label="Manifest" title="Selected work">
           <WorkManifest projects={projects} />
-        </PageSection>
+        </Section>
 
         {projectOne ? (
-          <PageSection
-            id={projectOne.slug}
-            title={projectOne.name}
-            index="03"
-            label="Case study"
-          >
-            <ProjectBrief project={projectOne} />
-          </PageSection>
+          <>
+            <TerminalRule />
+            <Section
+              id={projectOne.slug}
+              label="Case study"
+              title={projectOne.name}
+            >
+              <ProjectBrief project={projectOne} />
+            </Section>
+          </>
         ) : null}
 
         {projectTwo ? (
-          <PageSection
-            id={projectTwo.slug}
-            title={projectTwo.name}
-            index="04"
-            label="Case study"
-          >
-            <ProjectBrief project={projectTwo} />
-          </PageSection>
+          <>
+            <TerminalRule />
+            <Section
+              id={projectTwo.slug}
+              label="Case study"
+              title={projectTwo.name}
+            >
+              <ProjectBrief project={projectTwo} />
+            </Section>
+          </>
         ) : null}
 
-        <PageSection id="reflection" title="Reflection" index="05">
+        <TerminalRule />
+
+        <Section id="reflection" label="Reflection" title="Reflection">
           <p className="max-w-prose text-ink-body">{site.reflection}</p>
-        </PageSection>
+        </Section>
 
-        <PageSection
-          id="short-hops"
-          title="Short hops"
-          index="06"
-          label="Side projects"
-        >
+        <TerminalRule />
+
+        <Section id="short-hops" label="Side projects" title="Short hops">
           <ShortHops items={sideProjects} />
-        </PageSection>
+        </Section>
 
-        <PageSection id="contact" title="Contact" index="07">
+        <TerminalRule />
+
+        <Section id="contact" label="Contact" title="Contact">
           <p className="mb-6 max-w-prose text-ink-body">{site.contact}</p>
           <ContactLinks links={site.links} />
-        </PageSection>
-
-        <footer className="border-t border-hairline py-10">
-          <GutterRow marker="—">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 font-mono text-xs text-ink-muted">
-              <span>
-                © {new Date().getFullYear()} {site.name}
-              </span>
-              <span>{site.location}</span>
-            </div>
-          </GutterRow>
-        </footer>
-      </Container>
-    </main>
+        </Section>
+      </main>
+    </>
   );
 }

@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Container } from "@/components/Container";
-import { GutterRow } from "@/components/GutterRow";
-import { MetaTable } from "@/components/MetaTable";
+import { BlueprintStrip } from "@/components/BlueprintStrip";
+import { CaseChrome } from "@/components/CaseChrome";
+import { SectionLabel } from "@/components/SectionLabel";
 import { SignalLink } from "@/components/SignalLink";
-import { getProject, projects } from "@/content/projects";
+import { TerminalRule } from "@/components/TerminalRule";
+import {
+  getProject,
+  projects,
+  type ProjectChallenge,
+  type ProjectDecision,
+} from "@/content/projects";
 import { site } from "@/content/site";
 
 interface CaseStudyPageProps {
@@ -31,6 +37,44 @@ export async function generateMetadata({
   };
 }
 
+function EntryList({
+  heading,
+  id,
+  entries,
+}: {
+  heading: string;
+  id: string;
+  entries: Array<ProjectDecision | ProjectChallenge>;
+}) {
+  if (entries.length === 0) return null;
+
+  return (
+    <section aria-labelledby={`${id}-heading`}>
+      <TerminalRule />
+      <SectionLabel>{heading}</SectionLabel>
+      <h2 id={`${id}-heading`} className="sr-only">
+        {heading}
+      </h2>
+      <ol className="mt-2">
+        {entries.map((entry, i) => (
+          <li
+            key={entry.title}
+            className="grid grid-cols-[1.75rem_1fr] gap-4 border-t border-hairline py-5"
+          >
+            <span className="pt-1 font-mono text-xs text-ink-muted">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div>
+              <h3 className="font-display text-base text-ink">{entry.title}</h3>
+              <p className="mt-2 text-ink-body">{entry.detail}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
   const { slug } = await params;
   const project = getProject(slug);
@@ -39,133 +83,50 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
     notFound();
   }
 
+  const position = projects.findIndex((p) => p.slug === slug);
+  const next = projects[(position + 1) % projects.length];
+
   return (
-    <main>
-      <Container>
-        <div className="border-b border-hairline py-6">
-          <GutterRow>
-            <SignalLink
-              href="/"
-              variant="bare"
-              className="font-mono text-xs tracking-[0.2em] uppercase"
-            >
-              ← Index
-            </SignalLink>
-          </GutterRow>
-        </div>
+    <>
+      <CaseChrome
+        projectName={project.name}
+        client={project.client}
+        years={project.years}
+        index={position + 1}
+        total={projects.length}
+      />
 
+      <main className="doc pt-28 pb-[24vh] sm:pt-32">
         <article>
-          <header className="border-b border-hairline py-12 sm:py-16">
-            <GutterRow marker="00">
-              <p className="font-mono text-xs tracking-[0.2em] text-ink-muted uppercase">
-                Case study
-              </p>
-              <h1 className="mt-4 font-display text-[2.25rem] leading-[1.08] tracking-tight text-ink sm:text-5xl">
-                {project.name}
-              </h1>
-              <p className="mt-5 max-w-prose text-lg text-ink-body">
-                {project.summary}
-              </p>
-            </GutterRow>
-          </header>
+          <SectionLabel>Case study</SectionLabel>
+          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+            {project.name}
+          </h1>
 
-          <div className="border-b border-hairline py-10">
-            <GutterRow marker="01">
-              <p className="mb-4 font-mono text-xs tracking-[0.2em] text-ink-muted uppercase">
-                Parameters
-              </p>
-              <MetaTable
-                rows={[
-                  ["Client", project.client],
-                  ["Years", project.years],
-                  ["Methodology", project.methodology],
-                  ["Stack", project.stack.join(", ")],
-                ]}
-              />
-            </GutterRow>
-          </div>
+          <BlueprintStrip project={project} />
 
-          {project.decisions.length > 0 ? (
-            <section
-              aria-labelledby="decisions-heading"
-              className="border-b border-hairline py-12 sm:py-16"
-            >
-              <GutterRow marker="02">
-                <h2
-                  id="decisions-heading"
-                  className="font-display text-2xl tracking-tight text-ink sm:text-3xl"
-                >
-                  Decisions
-                </h2>
-                <ol className="mt-6 border-t border-hairline">
-                  {project.decisions.map((decision, index) => (
-                    <li
-                      key={decision.title}
-                      className="flex gap-4 border-b border-hairline py-5"
-                    >
-                      <span className="font-mono text-xs text-ink-muted">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <div className="min-w-0">
-                        <h3 className="font-display text-base text-ink">
-                          {decision.title}
-                        </h3>
-                        <p className="mt-2 max-w-prose text-ink-body">
-                          {decision.detail}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </GutterRow>
-            </section>
-          ) : null}
+          <p className="text-lg text-ink-body">{project.summary}</p>
 
-          {project.challenges.length > 0 ? (
-            <section
-              aria-labelledby="challenges-heading"
-              className="border-b border-hairline py-12 sm:py-16"
-            >
-              <GutterRow marker="03">
-                <h2
-                  id="challenges-heading"
-                  className="font-display text-2xl tracking-tight text-ink sm:text-3xl"
-                >
-                  Challenges
-                </h2>
-                <ol className="mt-6 border-t border-hairline">
-                  {project.challenges.map((challenge, index) => (
-                    <li
-                      key={challenge.title}
-                      className="flex gap-4 border-b border-hairline py-5"
-                    >
-                      <span className="font-mono text-xs text-ink-muted">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <div className="min-w-0">
-                        <h3 className="font-display text-base text-ink">
-                          {challenge.title}
-                        </h3>
-                        <p className="mt-2 max-w-prose text-ink-body">
-                          {challenge.detail}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </GutterRow>
-            </section>
-          ) : null}
+          <EntryList
+            heading="Decisions"
+            id="decisions"
+            entries={project.decisions}
+          />
+          <EntryList
+            heading="Challenges"
+            id="challenges"
+            entries={project.challenges}
+          />
 
-          <div className="py-12">
-            <GutterRow>
-              <SignalLink href="/" className="font-mono text-sm">
-                ← Back to index
-              </SignalLink>
-            </GutterRow>
-          </div>
+          <TerminalRule />
+
+          <p className="font-mono text-sm">
+            <SignalLink href={`/work/${next.slug}`}>
+              → Next · {next.name}
+            </SignalLink>
+          </p>
         </article>
-      </Container>
-    </main>
+      </main>
+    </>
   );
 }
