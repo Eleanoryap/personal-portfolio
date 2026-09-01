@@ -72,7 +72,10 @@ export function PathProgress() {
     let samples: Array<{ x: number; y: number; l: number }> = [];
     let bank = 0; // eased roll, degrees — 0 upright, 180 when doubled back left
     let heading = 0; // eased, radians — 0 (level) until the reader flies it
+    let pitch = 0; // eased, radians — nose up/down, only while parked
     let facingLeft = false; // hysteretic: which way the route last committed
+    let ptrX = 0; // cursor, −1..1 across the viewport (drives the parked plane)
+    let ptrY = 0;
     let mesh: FlightPlaneController | null = null;
 
     const build = () => {
@@ -149,16 +152,20 @@ export function PathProgress() {
       const after = samples[Math.min(samples.length - 1, i + 4)];
       const t2 = Math.atan2(after.y - b.y, after.x - b.x);
 
-      // nose follows the path (level at rest). Where the route doubles back
-      // to the left, roll 180° about the nose so the plane stays right-side-up
-      // instead of hanging inverted.
-      const targetHeading = flying ? t2 : 0;
-      heading += norm(targetHeading - heading) * 0.12;
+      // Parked (not yet flown): the plane is a toy — it noses, banks and drifts
+      // toward the cursor. In flight: the nose follows the path, and where the
+      // route doubles back left it rolls 180° about the nose so it stays
+      // right-side-up instead of hanging inverted.
+      const targetHeading = flying ? t2 : ptrX * 0.4;
+      heading += norm(targetHeading - heading) * (flying ? 0.12 : 0.09);
       // hysteresis so a near-vertical straightaway (cos ≈ 0) doesn't flip-flop
       if (Math.cos(t2) < -0.25) facingLeft = true;
       else if (Math.cos(t2) > 0.25) facingLeft = false;
-      const targetRoll = flying && facingLeft ? 180 : 0;
-      bank += (targetRoll - bank) * 0.12;
+      const targetRoll = flying ? (facingLeft ? 180 : 0) : ptrX * 22;
+      bank += (targetRoll - bank) * (flying ? 0.12 : 0.09);
+      const targetPitch = flying ? 0 : -ptrY * 0.34;
+      pitch += (targetPitch - pitch) * 0.09;
+      const yDrift = flying ? 0 : ptrY * 24;
 
       // large and near at the top, shrinking away into the distance
       const scale = 3 - 1.5 * prog;
@@ -168,9 +175,10 @@ export function PathProgress() {
       if (mesh) {
         mesh.update({
           x,
-          y: targetY - window.scrollY,
+          y: targetY - window.scrollY + yDrift,
           heading,
           bank: bank / DEG,
+          pitch: flying ? 0 : pitch,
           scale,
         });
       } else {
@@ -186,7 +194,8 @@ export function PathProgress() {
 
       return (
         Math.abs(norm(targetHeading - heading)) > 0.004 ||
-        Math.abs(targetRoll - bank) > 0.1
+        Math.abs(targetRoll - bank) > 0.1 ||
+        Math.abs(targetPitch - pitch) > 0.004
       );
     };
 
@@ -195,6 +204,12 @@ export function PathProgress() {
       raf = update() ? requestAnimationFrame(tick) : 0;
     };
     const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      if (window.scrollY > 4) return; // in flight the path is in charge
+      ptrX = (e.clientX / window.innerWidth) * 2 - 1;
+      ptrY = (e.clientY / window.innerHeight) * 2 - 1;
       if (!raf) raf = requestAnimationFrame(tick);
     };
     const rebuild = () => {
@@ -208,18 +223,22 @@ export function PathProgress() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", rebuild, { passive: true });
     window.addEventListener("themechange", onTheme);
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
     if (document.fonts?.ready) document.fonts.ready.then(rebuild);
     const settle = window.setTimeout(rebuild, 600);
 
-    // Upgrade to a real 3-D plane once three.js has loaded.
+    // Upgrade to a real 3-D plane once three.js has loaded — desktop only, so
+    // the ~180 KB stays off phones and tablets that can't drive it anyway.
     let cancelled = false;
-    createFlightPlane(canvas).then((ctrl) => {
-      if (cancelled || !ctrl) return;
-      mesh = ctrl;
-      ctrl.setColor(signal());
-      wrap.classList.add("path--3d");
-      rebuild();
-    });
+    if (window.matchMedia("(min-width: 64rem)").matches) {
+      createFlightPlane(canvas).then((ctrl) => {
+        if (cancelled || !ctrl) return;
+        mesh = ctrl;
+        ctrl.setColor(signal());
+        wrap.classList.add("path--3d");
+        rebuild();
+      });
+    }
 
     return () => {
       cancelled = true;
@@ -227,6 +246,7 @@ export function PathProgress() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", rebuild);
       window.removeEventListener("themechange", onTheme);
+      window.removeEventListener("pointermove", onPointerMove);
       window.clearTimeout(settle);
       mesh?.dispose();
     };

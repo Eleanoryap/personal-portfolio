@@ -331,13 +331,16 @@
     opacity: 0;
     transition: opacity 0.5s ease;
   }
-  :root[data-name3d][data-loaded]:not([data-scrolled]) .brand-canvas {
-    opacity: 1;
+  @media (min-width: 64rem) {
+    :root[data-name3d][data-loaded]:not([data-scrolled]) .brand-canvas {
+      opacity: 1;
+    }
+    /* while the blocks are up, keep the flat name for a11y but out of sight */
+    :root[data-name3d]:not([data-scrolled]) .brand--home {
+      opacity: 0;
+    }
   }
-  /* while the blocks are up, keep the flat name for a11y but out of sight */
-  :root[data-name3d]:not([data-scrolled]) .brand--home {
-    opacity: 0;
-  }
+  /* below the desktop breakpoint there is no 3-D name — never hide the flat one */
   @media (max-width: 63.99rem) {
     .brand-canvas {
       display: none;

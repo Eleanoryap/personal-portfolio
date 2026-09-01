@@ -164,7 +164,9 @@ export async function createNameBlocks(
     curX += (tgtX - curX) * EASE;
     curY += (tgtY - curY) * EASE;
     pivot.rotation.set(REST_PITCH + curX, REST_YAW + curY, 0);
-    if (!document.hidden) renderer.render(scene, camera);
+    // always draw — the loop only runs a few frames per settle, and skipping
+    // here on a hidden tab can leave the canvas blank with no way to recover
+    renderer.render(scene, camera);
     return Math.abs(tgtX - curX) > 0.0008 || Math.abs(tgtY - curY) > 0.0008;
   }
 

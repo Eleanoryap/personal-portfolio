@@ -91,8 +91,14 @@ export function HomeChrome() {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
 
+    // Desktop with a real pointer only. Touch devices (phones, tablets) get
+    // the flat <h1> — there's no cursor to drive the 3-D name, and the flip
+    // to the corner on scroll is all they need.
     const canvas = nameCanvasRef.current;
-    if (canvas && window.matchMedia("(min-width: 64rem)").matches) {
+    const desktop = window.matchMedia(
+      "(min-width: 64rem) and (hover: hover) and (pointer: fine)",
+    ).matches;
+    if (canvas && desktop) {
       createNameBlocks(canvas, site.name)
         .then((ctrl) => {
           if (!ctrl) return;

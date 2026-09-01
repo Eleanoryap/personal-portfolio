@@ -10,7 +10,8 @@ export interface FlightPlaneController {
     x: number; // screen px, viewport-relative
     y: number; // screen px, viewport-relative
     heading: number; // radians, screen space (atan2 of screen dy, dx)
-    bank: number; // radians
+    bank: number; // radians, roll about the nose
+    pitch?: number; // radians, nose up / down (used only at rest)
     scale: number;
   }): void;
   setColor(css: string): void;
@@ -64,70 +65,91 @@ export async function createFlightPlane(
     flatShading: true,
   });
 
-  // ---- low-poly aircraft, nose +x, wings ±z, fin +y ----
+  // ---- low-poly jet, nose +x, wings ±z, fin +y ----
   const jet = new THREE.Group();
 
+  // slender fuselage tapering to the tail, blunt at the intake
   const fuselage = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.34, 0.62, 4.6, 7),
+    new THREE.CylinderGeometry(0.16, 0.46, 5.4, 10),
     mat,
   );
-  fuselage.rotation.z = Math.PI / 2; // lie along x
+  fuselage.rotation.z = Math.PI / 2;
+  fuselage.position.x = -0.2;
   jet.add(fuselage);
 
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.34, 1.5, 7), mat);
+  // sharp nose cone
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.46, 1.7, 10), mat);
   nose.rotation.z = -Math.PI / 2;
-  nose.position.x = 3.05;
+  nose.position.x = 3.35;
   jet.add(nose);
 
-  const wingShape = new THREE.Shape();
-  wingShape.moveTo(1.2, 0);
-  wingShape.lineTo(-1.1, 3.6);
-  wingShape.lineTo(-1.9, 3.6);
-  wingShape.lineTo(-1.4, 0);
-  wingShape.closePath();
-  const wingGeo = new THREE.ExtrudeGeometry(wingShape, {
-    depth: 0.16,
-    bevelEnabled: false,
-  });
-  const wingR = new THREE.Mesh(wingGeo, mat);
-  wingR.rotation.x = -Math.PI / 2;
-  wingR.rotation.z = 0.16; // dihedral
-  wingR.position.set(0.1, 0, 0.1);
-  jet.add(wingR);
-  const wingL = wingR.clone();
-  wingL.scale.z = -1;
-  wingL.rotation.z = -0.16;
-  jet.add(wingL);
+  // raised canopy
+  const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 6), mat);
+  canopy.scale.set(1.6, 0.42, 0.6);
+  canopy.position.set(1.5, 0.34, 0);
+  jet.add(canopy);
 
-  const tailShape = new THREE.Shape();
-  tailShape.moveTo(0.5, 0);
-  tailShape.lineTo(-0.7, 1.5);
-  tailShape.lineTo(-1.1, 1.5);
-  tailShape.lineTo(-0.6, 0);
-  tailShape.closePath();
-  const tailGeo = new THREE.ExtrudeGeometry(tailShape, {
-    depth: 0.14,
-    bevelEnabled: false,
-  });
-  const tailR = new THREE.Mesh(tailGeo, mat);
-  tailR.rotation.x = -Math.PI / 2;
-  tailR.position.set(-2.1, 0, 0.07);
-  jet.add(tailR);
-  const tailL = tailR.clone();
-  tailL.scale.z = -1;
-  jet.add(tailL);
+  // helper: a flat swept panel in the x/z plane, mirrored across the fuselage
+  const panel = (
+    pts: Array<[number, number]>,
+    depth: number,
+    y: number,
+    dihedral: number,
+  ) => {
+    const s = new THREE.Shape();
+    s.moveTo(pts[0][0], pts[0][1]);
+    for (let k = 1; k < pts.length; k++) s.lineTo(pts[k][0], pts[k][1]);
+    s.closePath();
+    const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false });
+    const r = new THREE.Mesh(g, mat);
+    r.rotation.x = -Math.PI / 2;
+    r.rotation.z = dihedral;
+    r.position.set(0, y, 0);
+    jet.add(r);
+    const li = r.clone();
+    li.scale.z = -1;
+    li.rotation.z = -dihedral;
+    jet.add(li);
+  };
 
+  // main wings — swept delta, long root chord, short raked tip
+  panel(
+    [
+      [1.9, 0],
+      [-1.5, 4.1],
+      [-2.4, 4.1],
+      [-1.7, 0.35],
+    ],
+    0.12,
+    -0.05,
+    0.12,
+  );
+
+  // tailplane — a small echo of the wing near the tail
+  panel(
+    [
+      [-1.9, 0.2],
+      [-2.9, 1.7],
+      [-3.35, 1.7],
+      [-2.75, 0.2],
+    ],
+    0.1,
+    0.02,
+    0.05,
+  );
+
+  // single swept vertical fin, in the x/y plane
   const finShape = new THREE.Shape();
-  finShape.moveTo(0.4, 0);
-  finShape.lineTo(-0.9, 1.5);
-  finShape.lineTo(-1.4, 1.5);
-  finShape.lineTo(-0.5, 0);
+  finShape.moveTo(-1.7, 0);
+  finShape.lineTo(-2.55, 1.9);
+  finShape.lineTo(-3.05, 1.9);
+  finShape.lineTo(-2.85, 0);
   finShape.closePath();
   const fin = new THREE.Mesh(
-    new THREE.ExtrudeGeometry(finShape, { depth: 0.13, bevelEnabled: false }),
+    new THREE.ExtrudeGeometry(finShape, { depth: 0.12, bevelEnabled: false }),
     mat,
   );
-  fin.position.set(-2.0, 0, -0.065);
+  fin.position.z = -0.06;
   jet.add(fin);
 
   new THREE.Box3().setFromObject(jet).getCenter(jet.position).negate();
@@ -159,6 +181,7 @@ export async function createFlightPlane(
     y: number;
     heading: number;
     bank: number;
+    pitch?: number;
     scale: number;
   }) {
     pivot.position.set(o.x - vw / 2, vh / 2 - o.y, 0);
@@ -167,6 +190,7 @@ export async function createFlightPlane(
     pivot.rotation.set(0, 0, 0);
     pivot.rotateZ(-o.heading); // nose along the path (screen y is flipped)
     pivot.rotateX(-o.bank); // roll into the turn, around the nose axis
+    if (o.pitch) pivot.rotateY(o.pitch); // nose up / down toward the cursor
 
     if (!document.hidden) renderer.render(scene, camera);
   }
