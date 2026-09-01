@@ -49,8 +49,17 @@
     inset: -16% 0;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.4;
     transform: translateY(var(--drift, 0));
+  }
+  .backdrop > * {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .backdrop__contours {
+    opacity: 0.36;
     -webkit-mask-image: radial-gradient(
       ellipse 72% 58% at 50% 40%,
       #000 18%,
@@ -62,15 +71,63 @@
       transparent 72%
     );
   }
-  .backdrop svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  .backdrop path {
+  .backdrop__contours path {
     fill: none;
     stroke: var(--color-hairline);
     stroke-width: 1;
+  }
+
+  .backdrop__stars {
+    display: none;
+  }
+  :root[data-theme="dark"] .backdrop__stars {
+    display: block;
+  }
+  .backdrop__stars circle {
+    fill: var(--color-ink);
+  }
+  .backdrop__stars .twinkle {
+    animation: star-twinkle 5s ease-in-out infinite;
+  }
+  @keyframes star-twinkle {
+    0%,
+    100% {
+      opacity: 0.18;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+
+  .backdrop__clouds {
+    display: none;
+    overflow: hidden;
+  }
+  :root[data-theme="light"] .backdrop__clouds {
+    display: block;
+  }
+  .backdrop .cloud {
+    position: absolute;
+    height: auto;
+    opacity: 0.55;
+    filter: blur(2px);
+    animation: cloud-drift linear infinite;
+    will-change: transform;
+  }
+  @keyframes cloud-drift {
+    from {
+      transform: translateX(-13vw);
+    }
+    to {
+      transform: translateX(13vw);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .backdrop__stars .twinkle,
+    .backdrop .cloud {
+      animation: none;
+    }
   }
 
   [data-reveal] {
@@ -225,6 +282,16 @@
     box-shadow:
       0 0 0 14px var(--color-sky),
       0 0 34px 26px var(--color-sky);
+    /* extruded block faces, em-scaled so they track the size change */
+    text-shadow:
+      0.02em 0.02em 0 var(--color-ink-muted),
+      0.04em 0.04em 0 var(--color-ink-muted),
+      0.06em 0.06em 0 var(--color-ink-muted),
+      0.08em 0.08em 0 var(--color-ink-muted),
+      0.1em 0.1em 0 var(--color-ink-muted),
+      0.12em 0.12em 0 var(--color-ink-muted),
+      0.14em 0.14em 0.02em var(--color-ink-muted),
+      0.17em 0.17em 0.35em rgba(0, 0, 0, 0.45);
     transform-origin: top left;
     /* rest position = centred: shift the top-left corner by
        (half viewport − corner offset − half element). */
@@ -320,6 +387,12 @@
     width: 100%;
     height: 100%;
     overflow: visible;
+    /* the route only appears once the reader starts flying it */
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  :root[data-scrolled] .path > svg {
+    opacity: 1;
   }
   .path__track {
     fill: none;
