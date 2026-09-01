@@ -49,7 +49,7 @@ function EntryList({
   if (entries.length === 0) return null;
 
   return (
-    <section aria-labelledby={`${id}-heading`}>
+    <section aria-labelledby={`${id}-heading`} data-reveal>
       <TerminalRule />
       <SectionLabel>{heading}</SectionLabel>
       <h2 id={`${id}-heading`} className="sr-only">
@@ -98,14 +98,16 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
 
       <main className="doc pt-28 pb-[24vh] sm:pt-32">
         <article>
-          <SectionLabel>Case study</SectionLabel>
-          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
-            {project.name}
-          </h1>
+          <div data-reveal>
+            <SectionLabel>Case study</SectionLabel>
+            <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+              {project.name}
+            </h1>
 
-          <BlueprintStrip project={project} />
+            <BlueprintStrip project={project} />
 
-          <p className="text-lg text-ink-body">{project.summary}</p>
+            <p className="text-lg text-ink-body">{project.summary}</p>
+          </div>
 
           <EntryList
             heading="Decisions"

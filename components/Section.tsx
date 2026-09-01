@@ -21,7 +21,12 @@ export function Section({
   const headingId = `${id}-heading`;
 
   return (
-    <section id={id} aria-labelledby={headingId} className="py-11 sm:py-14">
+    <section
+      id={id}
+      aria-labelledby={headingId}
+      data-reveal
+      className="py-11 sm:py-14"
+    >
       <SectionLabel>{label}</SectionLabel>
       <h2
         id={headingId}

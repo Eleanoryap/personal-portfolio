@@ -17,12 +17,14 @@ export default function AboutPage() {
       <PageChrome back={{ href: "/", label: site.name }} topRight="About" />
 
       <main className="doc pt-28 pb-[24vh] sm:pt-32">
-        <SectionLabel>About</SectionLabel>
-        <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
-          {site.name}
-        </h1>
+        <div data-reveal>
+          <SectionLabel>About</SectionLabel>
+          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+            {site.name}
+          </h1>
+        </div>
 
-        <div className="mt-6 flex flex-col gap-4">
+        <div className="mt-6 flex flex-col gap-4" data-reveal>
           {about.bio.map((paragraph) => (
             <p
               key={paragraph.slice(0, 24)}
@@ -35,7 +37,7 @@ export default function AboutPage() {
 
         <TerminalRule />
 
-        <section aria-labelledby="experience-heading">
+        <section aria-labelledby="experience-heading" data-reveal>
           <SectionLabel>Experience</SectionLabel>
           <h2
             id="experience-heading"
@@ -77,7 +79,7 @@ export default function AboutPage() {
 
         <TerminalRule />
 
-        <section aria-labelledby="education-heading">
+        <section aria-labelledby="education-heading" data-reveal>
           <SectionLabel>Education</SectionLabel>
           <h2
             id="education-heading"
@@ -109,7 +111,7 @@ export default function AboutPage() {
 
         <TerminalRule />
 
-        <section aria-labelledby="skills-heading">
+        <section aria-labelledby="skills-heading" data-reveal>
           <SectionLabel>Skills</SectionLabel>
           <h2
             id="skills-heading"

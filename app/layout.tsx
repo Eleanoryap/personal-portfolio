@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Backdrop } from "@/components/Backdrop";
 import { LoaderController } from "@/components/LoaderController";
+import { RevealObserver } from "@/components/RevealObserver";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -52,7 +54,9 @@ export default function RootLayout({
           </span>
         </div>
         <LoaderController />
+        <RevealObserver />
 
+        <Backdrop />
         {children}
       </body>
     </html>

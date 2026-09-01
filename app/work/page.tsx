@@ -16,15 +16,18 @@ export default function WorkIndexPage() {
       <PageChrome back={{ href: "/", label: site.name }} topRight="Index" />
 
       <main className="doc pt-28 pb-[24vh] sm:pt-32">
-        <SectionLabel>Work</SectionLabel>
-        <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
-          Selected work
-        </h1>
+        <div data-reveal>
+          <SectionLabel>Work</SectionLabel>
+          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+            Selected work
+          </h1>
+        </div>
 
         <ol className="mt-10">
           {projects.map((project, index) => (
             <li
               key={project.slug}
+              data-reveal
               className="border-t border-hairline py-8 last:border-b"
             >
               <Link href={`/work/${project.slug}`} className="group block">
