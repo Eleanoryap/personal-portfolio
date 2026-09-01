@@ -25,7 +25,8 @@ Architecture:
 - Theme: an inline script in <head> applies the stored choice before
   paint; ThemeToggle flips [data-theme] and persists to localStorage.
 - All copy lives in typed data files under content/, never inline in JSX:
-  content/site.ts, content/projects.ts, content/sideProjects.ts.
+  content/site.ts, content/projects.ts, content/sideProjects.ts,
+  content/about.ts.
 - Design direction: monospace-forward, near-monochrome with the signal
   accent used sparingly, name/metadata pinned to the viewport corners
   (a solid top bar under 40rem). Prose is Inter; labels and data are mono.
@@ -33,8 +34,12 @@ Architecture:
   settling from centre to corner on first scroll. All of it collapses
   under prefers-reduced-motion. No scroll-driven effects beyond that.
 - Routes: / (homepage — a hero screen then one continuous scrolling
-  document), /work/[slug] (case study rendered from content/projects.ts).
-- Key components: HomeChrome / CaseChrome (corner furniture), Section +
+  document), /work (case-study index), /work/[slug] (case study from
+  content/projects.ts), /about (from content/about.ts), plus not-found.
+- Corner furniture: HomeChrome on the homepage (hero + travel), PageChrome
+  everywhere else (static; CaseChrome composes it). ThemeToggle lives in
+  the bottom-right slot / mobile bar.
+- Key components: HomeChrome / PageChrome / CaseChrome, Section +
   SectionLabel, TerminalRule, BlueprintStrip, WorkManifest, ProjectBrief,
   MetaTable, ShortHops, ContactLinks, SignalLink.
 
