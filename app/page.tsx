@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { HomeChrome } from "@/components/HomeChrome";
 import { Section } from "@/components/Section";
 import { TerminalRule } from "@/components/TerminalRule";
@@ -71,6 +72,26 @@ export default function HomePage() {
           <p className="mb-6 max-w-prose text-ink-body">{site.contact}</p>
           <ContactLinks links={site.links} />
         </Section>
+
+        <footer className="mt-4 border-t border-hairline pt-8 pb-16 font-mono text-xs text-ink-muted">
+          <nav
+            className="flex flex-wrap gap-x-6 gap-y-2 uppercase tracking-[0.14em]"
+            aria-label="Site"
+          >
+            <Link href="/about" className="hover:text-signal">
+              About
+            </Link>
+            <Link href="/work" className="hover:text-signal">
+              Work
+            </Link>
+            <a href="#statement" className="hover:text-signal">
+              Top
+            </a>
+          </nav>
+          <p className="mt-4">
+            © {new Date().getFullYear()} {site.name} · {site.location}
+          </p>
+        </footer>
       </main>
     </>
   );
