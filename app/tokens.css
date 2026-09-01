@@ -3,9 +3,14 @@
  * Components must reference the token (Tailwind theme utility or var()),
  * never a raw hex or font family name.
  *
+ * The @theme block holds the light palette and generates the utilities
+ * (bg-sky, text-ink, ...). The blocks below re-point the same custom
+ * properties for dark mode:
+ *   - system dark, unless the visitor has explicitly chosen light
+ *   - an explicit [data-theme] choice always wins
+ *
  * Font source variables (--font-*-src) are provided by next/font in
- * app/layout.tsx. Swapping a typeface means changing the import there
- * and, if the source variable is renamed, the one line below.
+ * app/layout.tsx.
  */
 
 @theme {
@@ -21,4 +26,28 @@
   --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-body-src), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-src), ui-monospace, "SFMono-Regular", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-sky: #10151a;
+    --color-plate: #171e25;
+    --color-paper: #1b232b;
+    --color-ink: #eef2f6;
+    --color-ink-body: #aab6c0;
+    --color-ink-muted: #72808d;
+    --color-hairline: #303b45;
+    --color-signal: #f0793f;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-sky: #10151a;
+  --color-plate: #171e25;
+  --color-paper: #1b232b;
+  --color-ink: #eef2f6;
+  --color-ink-body: #aab6c0;
+  --color-ink-muted: #72808d;
+  --color-hairline: #303b45;
+  --color-signal: #f0793f;
 }
