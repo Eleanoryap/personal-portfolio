@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   description: site.statement,
 };
 
-// Runs before first paint so the stored theme is applied without a flash.
-const themeInit = `(function(){try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t}}catch(e){}})()`;
+// Runs before first paint. Dark is the default; light is opt-in and persisted.
+const themeInit = `(function(){try{var t=localStorage.getItem("theme");document.documentElement.dataset.theme=(t==="light"||t==="dark")?t:"dark"}catch(e){document.documentElement.dataset.theme="dark"}})()`;
 
 export default function RootLayout({
   children,

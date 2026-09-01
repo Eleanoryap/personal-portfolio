@@ -4,25 +4,16 @@ import { useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
-const DARK_MQ = "(prefers-color-scheme: dark)";
-
 function subscribe(onChange: () => void) {
-  const mq = window.matchMedia(DARK_MQ);
-  mq.addEventListener("change", onChange);
   window.addEventListener("themechange", onChange);
-  return () => {
-    mq.removeEventListener("change", onChange);
-    window.removeEventListener("themechange", onChange);
-  };
+  return () => window.removeEventListener("themechange", onChange);
 }
 
 function getSnapshot(): Theme {
-  const explicit = document.documentElement.dataset.theme;
-  if (explicit === "light" || explicit === "dark") return explicit;
-  return window.matchMedia(DARK_MQ).matches ? "dark" : "light";
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
-const getServerSnapshot = (): Theme => "light";
+const getServerSnapshot = (): Theme => "dark";
 
 export function ThemeToggle() {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

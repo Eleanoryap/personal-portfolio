@@ -13,17 +13,19 @@ ESLint + Prettier
 
 Architecture:
 
-- Design tokens live in app/tokens.css. The @theme block holds the light
-  palette and generates the utilities; dark values are re-pointed for
-  prefers-color-scheme and for an explicit [data-theme]. Components
-  reference token-backed utilities (bg-sky, text-ink, ...) or var(--color-*)
-  — never a raw hex or font family name. Blueprint-specific styles
-  (chrome, hero, manifesto, terminal rule, blueprint strip) live in the
-  @layer components block of app/globals.css.
+- Design tokens live in app/tokens.css. The site is dark by default: the
+  @theme block holds the dark palette and generates the utilities; light is
+  an explicit opt-in via [data-theme="light"]. Components reference
+  token-backed utilities (bg-sky, text-ink, ...) or var(--color-*) — never a
+  raw hex or font family name. Blueprint-specific styles (chrome, hero,
+  manifesto, terminal rule, blueprint strip) live in the @layer components
+  block of app/globals.css.
 - Fonts load via next/font in app/layout.tsx and expose --font-*-src
   variables that tokens.css maps to --font-display/body/mono.
-- Theme: an inline script in <head> applies the stored choice before
-  paint; ThemeToggle flips [data-theme] and persists to localStorage.
+- Theme: an inline script in <head> stamps [data-theme] before paint
+  (stored choice, else "dark"); ThemeToggle flips it and persists to
+  localStorage. System prefers-color-scheme is not consulted — dark is the
+  deliberate default.
 - All copy lives in typed data files under content/, never inline in JSX:
   content/site.ts, content/projects.ts, content/sideProjects.ts,
   content/about.ts.

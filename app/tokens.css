@@ -3,45 +3,16 @@
  * Components must reference the token (Tailwind theme utility or var()),
  * never a raw hex or font family name.
  *
- * The @theme block holds the light palette and generates the utilities
- * (bg-sky, text-ink, ...). The blocks below re-point the same custom
- * properties for dark mode:
- *   - system dark, unless the visitor has explicitly chosen light
- *   - an explicit [data-theme] choice always wins
+ * The site is dark by default: the @theme block holds the dark palette and
+ * generates the utilities (bg-sky, text-ink, ...). Light is an explicit
+ * opt-in via [data-theme="light"]; the toggle persists the choice and an
+ * inline script in app/layout.tsx stamps [data-theme] before first paint.
  *
  * Font source variables (--font-*-src) are provided by next/font in
  * app/layout.tsx.
  */
 
 @theme {
-  --color-sky: #e9eef3;
-  --color-plate: #f4f7fa;
-  --color-paper: #fcfdfe;
-  --color-ink: #111820;
-  --color-ink-body: #4a5560;
-  --color-ink-muted: #7a8794;
-  --color-hairline: #c7d1db;
-  --color-signal: #e2662b;
-
-  --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-body-src), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono-src), ui-monospace, "SFMono-Regular", monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-sky: #10151a;
-    --color-plate: #171e25;
-    --color-paper: #1b232b;
-    --color-ink: #eef2f6;
-    --color-ink-body: #aab6c0;
-    --color-ink-muted: #72808d;
-    --color-hairline: #303b45;
-    --color-signal: #f0793f;
-  }
-}
-
-:root[data-theme="dark"] {
   --color-sky: #10151a;
   --color-plate: #171e25;
   --color-paper: #1b232b;
@@ -50,4 +21,19 @@
   --color-ink-muted: #72808d;
   --color-hairline: #303b45;
   --color-signal: #f0793f;
+
+  --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-src), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-src), ui-monospace, "SFMono-Regular", monospace;
+}
+
+:root[data-theme="light"] {
+  --color-sky: #e9eef3;
+  --color-plate: #f4f7fa;
+  --color-paper: #fcfdfe;
+  --color-ink: #111820;
+  --color-ink-body: #4a5560;
+  --color-ink-muted: #7a8794;
+  --color-hairline: #c7d1db;
+  --color-signal: #e2662b;
 }

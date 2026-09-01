@@ -1,10 +1,10 @@
 # personal-portfolio
 
-Eleanor Yap's personal portfolio. Monospace-forward, near-monochrome, with
-viewport-corner furniture and a light/dark toggle. Content is static and
-server-rendered; the only motion is the loading screen and the hero name
-settling into the corner on first scroll (both disabled under
-`prefers-reduced-motion`).
+Eleanor Yap's personal portfolio. Monospace-forward, near-monochrome,
+dark by default with a light toggle, and viewport-corner furniture.
+Content is static and server-rendered; the only motion is the loading
+screen and the hero name settling into the corner on first scroll (both
+disabled under `prefers-reduced-motion`).
 
 ## Stack
 
