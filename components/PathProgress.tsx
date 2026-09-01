@@ -99,9 +99,9 @@ export function PathProgress() {
         .filter((y) => y > startY + 60 && y < h - 40);
 
       const pts: Array<{ x: number; y: number }> = [
-        { x: w / 2, y: startY }, // the plane rests here, level, until scroll
+        { x: rightX, y: startY }, // the plane rests here, level, until scroll
       ];
-      let onLeft = true;
+      let onLeft = false; // depart down the right margin
       for (const cy of crossings) {
         pts.push({ x: onLeft ? leftX : rightX, y: cy - 70 });
         pts.push({ x: onLeft ? rightX : leftX, y: cy + 70 });
@@ -143,18 +143,16 @@ export function PathProgress() {
       const x = a.x + (b.x - a.x) * t;
       const l = a.l + (b.l - a.l) * t;
 
-      // path tangent + how hard it is turning
-      const before = samples[Math.max(0, i - 3)];
+      // path tangent
       const after = samples[Math.min(samples.length - 1, i + 3)];
-      const t1 = Math.atan2(a.y - before.y, a.x - before.x);
       const t2 = Math.atan2(after.y - b.y, after.x - b.x);
-      const turn = norm(t2 - t1) * DEG;
 
-      // level and steady at rest; eases onto the route once flying
-      const targetHeading = flying ? t2 : 0;
-      const targetBank = flying ? Math.max(-32, Math.min(32, turn * 1.6)) : 0;
+      // stays upright — only a slight nose toward its direction, never rolls
+      const targetHeading = flying
+        ? Math.max(-0.18, Math.min(0.18, t2 * 0.25))
+        : 0;
       heading += norm(targetHeading - heading) * 0.14;
-      bank += (targetBank - bank) * 0.12;
+      bank += (0 - bank) * 0.12;
 
       // large and near at the top, shrinking away into the distance
       const scale = 3 - 1.5 * prog;
@@ -178,10 +176,7 @@ export function PathProgress() {
           `rotateZ(${heading * DEG}deg) rotateY(${bank}deg)`;
       }
 
-      return (
-        Math.abs(heading - targetHeading) > 0.004 ||
-        Math.abs(bank - targetBank) > 0.05
-      );
+      return Math.abs(heading - targetHeading) > 0.004 || Math.abs(bank) > 0.05;
     };
 
     let raf = 0;
