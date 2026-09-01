@@ -99,9 +99,10 @@ export function PathProgress() {
         .filter((y) => y > startY + 60 && y < h - 40);
 
       const pts: Array<{ x: number; y: number }> = [
-        { x: rightX, y: startY }, // the plane rests here, level, until scroll
+        { x: w / 2, y: startY }, // the plane rests here, below the name
+        { x: rightX, y: startY + vh * 0.32 }, // then slides out to the right
       ];
-      let onLeft = false; // depart down the right margin
+      let onLeft = false; // ...and carries on down the right margin
       for (const cy of crossings) {
         pts.push({ x: onLeft ? leftX : rightX, y: cy - 70 });
         pts.push({ x: onLeft ? rightX : leftX, y: cy + 70 });
@@ -143,15 +144,13 @@ export function PathProgress() {
       const x = a.x + (b.x - a.x) * t;
       const l = a.l + (b.l - a.l) * t;
 
-      // path tangent
-      const after = samples[Math.min(samples.length - 1, i + 3)];
+      // path tangent — the nose points wherever the route is heading next
+      const after = samples[Math.min(samples.length - 1, i + 4)];
       const t2 = Math.atan2(after.y - b.y, after.x - b.x);
 
-      // stays upright — only a slight nose toward its direction, never rolls
-      const targetHeading = flying
-        ? Math.max(-0.18, Math.min(0.18, t2 * 0.25))
-        : 0;
-      heading += norm(targetHeading - heading) * 0.14;
+      // nose follows the path (level at rest); never rolls
+      const targetHeading = flying ? t2 : 0;
+      heading += norm(targetHeading - heading) * 0.12;
       bank += (0 - bank) * 0.12;
 
       // large and near at the top, shrinking away into the distance

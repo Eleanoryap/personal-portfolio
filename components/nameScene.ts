@@ -32,7 +32,7 @@ function webglOk() {
 const FONT_URL = "/fonts/syne-800.ttf";
 const GLYPH_SIZE = 200; // font units the outline is generated at
 const EASE = 0.09;
-const REST_PITCH = 0.13; // the blocks sit at a slight angle so the depth reads
+const REST_PITCH = -0.17; // tilted up a little, so we read the blocks from below
 const REST_YAW = 0.11;
 
 export async function createNameBlocks(
@@ -109,9 +109,9 @@ export async function createNameBlocks(
   const scene = new THREE.Scene();
   scene.add(pivot);
 
-  // High, slightly-forward camera so the extruded tops catch the light.
+  // Near-level camera so an upward tilt of the blocks reads as looking up at them.
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1200, 1200);
-  camera.position.set(0, 44, 120);
+  camera.position.set(0, 14, 120);
   camera.lookAt(0, 0, 0);
 
   scene.add(new THREE.AmbientLight(0xffffff, 1.15));
@@ -156,8 +156,8 @@ export async function createNameBlocks(
   }
 
   function setPointer(nx: number, ny: number) {
-    tgtY = nx * 0.22; // extra yaw toward the cursor
-    tgtX = -ny * 0.12; // extra pitch, opposite the cursor's vertical
+    tgtY = nx * 0.42; // extra yaw toward the cursor
+    tgtX = -ny * 0.26; // extra pitch, opposite the cursor's vertical
   }
 
   function render(): boolean {
