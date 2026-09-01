@@ -156,6 +156,8 @@
   }
 
   /* ---- The travelling name -------------------------------------- */
+  /* Variants set their own size: --home animates between hero and corner,
+     --case is a fixed small back-link. */
   .brand {
     position: fixed;
     top: 22px;
@@ -164,7 +166,7 @@
     margin: 0;
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(2rem, 6vw, 3rem);
+    font-size: 1.15rem;
     line-height: 1;
     letter-spacing: -0.01em;
     white-space: nowrap;
@@ -176,18 +178,36 @@
     text-decoration: none;
   }
   .brand--home {
+    font-size: clamp(1.7rem, 8vw, 5.25rem);
+    letter-spacing: -0.015em;
     background-color: var(--color-sky);
     box-shadow:
-      0 0 0 12px var(--color-sky),
-      0 0 30px 24px var(--color-sky);
+      0 0 0 14px var(--color-sky),
+      0 0 34px 26px var(--color-sky);
     transform-origin: top left;
     /* rest position = centred: shift the top-left corner by
        (half viewport − corner offset − half element). */
     transform: translate(calc(50vw - 24px - 50%), calc(42svh - 22px - 50%));
-    transition: transform 0.75s cubic-bezier(0.6, 0, 0.15, 1);
+    transition:
+      transform 0.8s cubic-bezier(0.6, 0, 0.15, 1),
+      font-size 0.8s cubic-bezier(0.6, 0, 0.15, 1),
+      opacity 0.55s ease,
+      clip-path 0.8s cubic-bezier(0.6, 0, 0.15, 1);
+  }
+  /* Entrance: HomeChrome adds [data-intro] on mount (skipped for reduced
+     motion, and never present without JS, so the name stays visible). It
+     hides behind the loader, then reveals when the loader sets [data-loaded]. */
+  :root[data-intro] .brand--home {
+    opacity: 0;
+    clip-path: inset(108% 0 0 0);
+  }
+  :root[data-intro][data-loaded] .brand--home {
+    opacity: 1;
+    clip-path: inset(-14% 0 -14% 0);
   }
   :root[data-scrolled] .brand--home {
-    transform: translate(0, 0) scale(0.4);
+    font-size: 1.15rem;
+    transform: translate(0, 0);
   }
   .brand--case {
     font-size: 1.1rem;
@@ -239,6 +259,44 @@
     50% {
       transform: rotate(45deg) translate(3px, 3px);
       opacity: 1;
+    }
+  }
+
+  /* ---- The path (homepage scroll progress) -------------------- */
+  .path {
+    position: fixed;
+    left: 16px;
+    top: 120px;
+    bottom: 60px;
+    width: 1px;
+    z-index: 55;
+    background: var(--color-hairline);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  :root[data-scrolled] .path {
+    opacity: 1;
+  }
+  .path__fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: calc(var(--p, 0) * 100%);
+    background: var(--color-signal);
+  }
+  .path__marker {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--p, 0) * 100%);
+    transform: translate(-50%, -50%);
+    color: var(--color-signal);
+    line-height: 0;
+  }
+  @media (max-width: 63.99rem) {
+    .path {
+      display: none;
     }
   }
 
@@ -394,7 +452,8 @@
       transform: translate(calc(50vw - 16px - 50%), calc(42svh - 50%));
     }
     :root[data-scrolled] .brand--home {
-      transform: translate(0, 0) scale(0.46);
+      transform: translate(0, 0);
+      font-size: 1rem;
     }
     .brand--case {
       font-size: 1rem;
@@ -406,7 +465,8 @@
     .loader,
     .brand--home,
     .chrome--home .chrome__fx,
-    .hero-cue {
+    .hero-cue,
+    .path {
       transition: none;
     }
     .hero-cue__chev,

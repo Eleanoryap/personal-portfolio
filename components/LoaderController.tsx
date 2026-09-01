@@ -21,6 +21,7 @@ export function LoaderController() {
       if (removed) return;
       removed = true;
       el.classList.add("is-done");
+      document.documentElement.setAttribute("data-loaded", "");
       window.setTimeout(() => el.remove(), 450);
     };
 

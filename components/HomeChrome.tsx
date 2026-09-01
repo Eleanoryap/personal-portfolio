@@ -31,6 +31,9 @@ export function HomeChrome() {
       return () => root.removeAttribute("data-scrolled");
     }
 
+    // Arm the name entrance (it hides behind the loader, then reveals).
+    root.setAttribute("data-intro", "");
+
     let ticking = false;
     const update = () => {
       const past = window.scrollY > Math.min(window.innerHeight * 0.25, 180);
@@ -48,6 +51,7 @@ export function HomeChrome() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       root.removeAttribute("data-scrolled");
+      root.removeAttribute("data-intro");
     };
   }, []);
 

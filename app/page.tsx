@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { HomeChrome } from "@/components/HomeChrome";
+import { PathProgress } from "@/components/PathProgress";
+import { ReplayIntro } from "@/components/ReplayIntro";
 import { Section } from "@/components/Section";
 import { TerminalRule } from "@/components/TerminalRule";
 import { WorkManifest } from "@/components/WorkManifest";
@@ -16,6 +18,7 @@ export default function HomePage() {
   return (
     <>
       <HomeChrome />
+      <PathProgress />
 
       <main className="doc doc--hero pb-[28vh]">
         <Section id="statement" label="Statement" title="Statement" hideTitle>
@@ -87,6 +90,7 @@ export default function HomePage() {
             <a href="#statement" className="hover:text-signal">
               Top
             </a>
+            <ReplayIntro />
           </nav>
           <p className="mt-4">
             © {new Date().getFullYear()} {site.name} · {site.location}
