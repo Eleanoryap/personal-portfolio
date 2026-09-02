@@ -43,12 +43,13 @@
 }
 
 @layer components {
-  /* ---- Depth: backdrop + reveal ---------------------------------- */
+  /* ---- Depth: the sky --------------------------------------------- */
   .backdrop {
     position: fixed;
     inset: -16% 0;
     z-index: 0;
     pointer-events: none;
+    overflow: hidden;
     transform: translateY(var(--drift, 0));
   }
   .backdrop > * {
@@ -56,6 +57,32 @@
     inset: 0;
     width: 100%;
     height: 100%;
+  }
+
+  /* three parallax layers, shifted opposite the cursor via --px / --py */
+  .plx {
+    will-change: transform;
+  }
+  .plx--far {
+    transform: translate3d(
+      calc(var(--px, 0) * -6px),
+      calc(var(--py, 0) * -6px),
+      0
+    );
+  }
+  .plx--mid {
+    transform: translate3d(
+      calc(var(--px, 0) * -16px),
+      calc(var(--py, 0) * -12px),
+      0
+    );
+  }
+  .plx--near {
+    transform: translate3d(
+      calc(var(--px, 0) * -32px),
+      calc(var(--py, 0) * -24px),
+      0
+    );
   }
 
   .backdrop__contours {
@@ -70,13 +97,23 @@
       #000 18%,
       transparent 72%
     );
+    animation: contour-drift 44s ease-in-out infinite alternate;
   }
   .backdrop__contours path {
     fill: none;
     stroke: var(--color-hairline);
     stroke-width: 1;
   }
+  @keyframes contour-drift {
+    from {
+      transform: translate3d(-1.6%, 0, 0);
+    }
+    to {
+      transform: translate3d(1.6%, 0.7%, 0);
+    }
+  }
 
+  /* ---- stars + galactic band (dark) ---- */
   .backdrop__stars {
     display: none;
   }
@@ -86,22 +123,266 @@
   .backdrop__stars circle {
     fill: var(--color-ink);
   }
+  .backdrop__stars .star--bright {
+    filter: drop-shadow(0 0 1.1px rgba(238, 242, 246, 0.9));
+  }
   .backdrop__stars .twinkle {
     animation: star-twinkle 5s ease-in-out infinite;
   }
   @keyframes star-twinkle {
     0%,
     100% {
-      opacity: 0.18;
+      opacity: 0.16;
     }
     50% {
-      opacity: 0.85;
+      opacity: 0.9;
     }
   }
 
+  .sky-band {
+    display: none;
+  }
+  :root[data-theme="dark"] .sky-band {
+    display: block;
+    position: absolute;
+    left: -25%;
+    right: -25%;
+    top: 22%;
+    height: 46%;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--color-ink) 13%, transparent),
+      transparent
+    );
+    filter: blur(34px);
+    transform: rotate(-22deg);
+  }
+
+  /* ---- celestial bodies ---- */
+  .orb {
+    position: absolute;
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+  .orb--moon,
+  .planet,
+  .comet {
+    display: none;
+  }
+  :root[data-theme="dark"] .orb--moon,
+  :root[data-theme="dark"] .planet,
+  :root[data-theme="dark"] .comet {
+    display: block;
+  }
+  .orb--sun {
+    display: none;
+  }
+  :root[data-theme="light"] .orb--sun {
+    display: block;
+  }
+
+  .orb--moon {
+    width: clamp(66px, 8.5vw, 116px);
+    left: 54%;
+    top: 25%;
+    background: radial-gradient(
+      circle at 38% 34%,
+      #f4f7fa,
+      #d2dbe3 52%,
+      #aeb9c4 76%,
+      #95a1ac
+    );
+    box-shadow:
+      0 0 42px 10px rgba(206, 220, 233, 0.2),
+      0 0 130px 46px rgba(150, 172, 194, 0.1);
+    animation: orb-float 15s ease-in-out infinite;
+  }
+  .orb--moon::before,
+  .orb--moon::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(120, 133, 146, 0.3);
+  }
+  .orb--moon::before {
+    width: 24%;
+    height: 24%;
+    left: 21%;
+    top: 27%;
+  }
+  .orb--moon::after {
+    width: 15%;
+    height: 15%;
+    left: 56%;
+    top: 58%;
+    box-shadow: -0.9em -0.7em 0 -0.32em rgba(120, 133, 146, 0.26);
+  }
+
+  .orb--sun {
+    width: clamp(74px, 10vw, 134px);
+    left: 54%;
+    top: 22%;
+    background: radial-gradient(
+      circle at 50% 46%,
+      #fff7ea,
+      #ffe6bd 46%,
+      #ffcf95 72%,
+      #f7b070
+    );
+    box-shadow:
+      0 0 54px 16px rgba(255, 210, 150, 0.36),
+      0 0 150px 66px rgba(255, 188, 120, 0.16);
+    animation: orb-pulse 7s ease-in-out infinite;
+  }
+  .orb__rays {
+    position: absolute;
+    inset: -52%;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+      from 0deg,
+      color-mix(in srgb, var(--color-signal) 13%, transparent) 0 1.6deg,
+      transparent 1.6deg 15deg
+    );
+    -webkit-mask: radial-gradient(
+      circle,
+      transparent 44%,
+      #000 50%,
+      #000 70%,
+      transparent 80%
+    );
+    mask: radial-gradient(
+      circle,
+      transparent 44%,
+      #000 50%,
+      #000 70%,
+      transparent 80%
+    );
+    animation: spin 140s linear infinite;
+  }
+
+  .planet {
+    border-radius: 50%;
+  }
+  .planet--a {
+    width: clamp(34px, 4.4vw, 56px);
+    left: 10%;
+    top: 58%;
+    background: radial-gradient(
+      circle at 34% 30%,
+      #a9bfd2,
+      #61788a 55%,
+      #3d4c5a
+    );
+    animation: orb-float 19s ease-in-out infinite;
+  }
+  .planet--a::after {
+    content: "";
+    position: absolute;
+    left: -48%;
+    top: 33%;
+    width: 196%;
+    height: 34%;
+    border: 1.5px solid rgba(163, 182, 199, 0.4);
+    border-radius: 50%;
+    transform: rotate(-17deg);
+  }
+  .planet--b {
+    width: clamp(16px, 2vw, 26px);
+    right: 13%;
+    left: auto;
+    top: 30%;
+    background: radial-gradient(
+      circle at 40% 36%,
+      #d69a72,
+      #9a613d 60%,
+      #6b4429
+    );
+    box-shadow: 0 0 20px 4px rgba(214, 154, 114, 0.16);
+    animation: orb-float 23s ease-in-out infinite;
+  }
+
+  .comet {
+    position: absolute;
+    width: clamp(88px, 12vw, 156px);
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, rgba(233, 240, 247, 0.95));
+    filter: drop-shadow(0 0 5px rgba(220, 235, 250, 0.7));
+    opacity: 0;
+  }
+  .comet--a {
+    left: -14%;
+    top: 7%;
+    animation: comet-a 18s ease-in infinite 3s;
+  }
+  .comet--b {
+    left: -14%;
+    top: 26%;
+    animation: comet-b 29s ease-in infinite 11s;
+  }
+  @keyframes comet-a {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(19deg);
+      opacity: 0;
+    }
+    2% {
+      opacity: 0.9;
+    }
+    11% {
+      transform: translate3d(74vw, 46vh, 0) rotate(19deg);
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes comet-b {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(27deg);
+      opacity: 0;
+    }
+    3% {
+      opacity: 0.8;
+    }
+    12% {
+      transform: translate3d(82vw, 54vh, 0) rotate(27deg);
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes orb-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  @keyframes orb-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.035);
+      opacity: 0.92;
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ---- clouds (light) ---- */
   .backdrop__clouds {
     display: none;
-    overflow: hidden;
   }
   :root[data-theme="light"] .backdrop__clouds {
     display: block;
@@ -109,24 +390,43 @@
   .backdrop .cloud {
     position: absolute;
     height: auto;
-    opacity: 0.55;
     filter: blur(2px);
     animation: cloud-drift linear infinite;
     will-change: transform;
   }
+  .plx--near .cloud {
+    filter: blur(5px);
+  }
   @keyframes cloud-drift {
-    from {
-      transform: translateX(-13vw);
+    0% {
+      transform: translate3d(-17vw, 0, 0);
     }
-    to {
-      transform: translateX(13vw);
+    50% {
+      transform: translate3d(0, -1.4vh, 0);
+    }
+    100% {
+      transform: translate3d(17vw, 0, 0);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .backdrop__contours,
     .backdrop__stars .twinkle,
-    .backdrop .cloud {
+    .backdrop .cloud,
+    .orb--moon,
+    .orb--sun,
+    .orb__rays,
+    .planet,
+    .comet {
       animation: none;
+    }
+    .comet {
+      display: none;
+    }
+    .plx--far,
+    .plx--mid,
+    .plx--near {
+      transform: none;
     }
   }
 

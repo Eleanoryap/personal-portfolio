@@ -64,29 +64,45 @@ export async function createFlightPlane(
     metalness: 0.1,
     flatShading: true,
   });
+  // dark, semi-gloss — canopy glass and the exhaust nozzle
+  const dark = new THREE.MeshStandardMaterial({
+    color: new THREE.Color("#3a434f"),
+    roughness: 0.26,
+    metalness: 0.5,
+    flatShading: true,
+  });
 
-  // ---- low-poly jet, nose +x, wings ±z, fin +y ----
+  // ---- low-poly jet, nose +x, wings ±z, fins +y ----
   const jet = new THREE.Group();
 
-  // slender fuselage tapering to the tail, blunt at the intake
+  // slender fuselage, blunt intake to a tapered tail
   const fuselage = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.16, 0.46, 5.4, 10),
+    new THREE.CylinderGeometry(0.13, 0.44, 5.8, 12),
     mat,
   );
   fuselage.rotation.z = Math.PI / 2;
-  fuselage.position.x = -0.2;
+  fuselage.position.x = -0.25;
   jet.add(fuselage);
 
-  // sharp nose cone
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.46, 1.7, 10), mat);
+  // sharp nose
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.44, 2, 12), mat);
   nose.rotation.z = -Math.PI / 2;
-  nose.position.x = 3.35;
+  nose.position.x = 3.65;
   jet.add(nose);
 
-  // raised canopy
-  const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 6), mat);
-  canopy.scale.set(1.6, 0.42, 0.6);
-  canopy.position.set(1.5, 0.34, 0);
+  // exhaust nozzle
+  const nozzle = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.3, 0.22, 0.55, 12),
+    dark,
+  );
+  nozzle.rotation.z = Math.PI / 2;
+  nozzle.position.x = -3.35;
+  jet.add(nozzle);
+
+  // low, faired canopy
+  const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.46, 12, 8), dark);
+  canopy.scale.set(1.9, 0.5, 0.58);
+  canopy.position.set(1.45, 0.36, 0);
   jet.add(canopy);
 
   // helper: a flat swept panel in the x/z plane, mirrored across the fuselage
@@ -112,45 +128,51 @@ export async function createFlightPlane(
     jet.add(li);
   };
 
-  // main wings — swept delta, long root chord, short raked tip
+  // main wings — blended root extension sweeping back to a raked tip
   panel(
     [
-      [1.9, 0],
-      [-1.5, 4.1],
-      [-2.4, 4.1],
-      [-1.7, 0.35],
+      [2.7, 0.12],
+      [-1.6, 4.4],
+      [-2.7, 4.4],
+      [-1.95, 0.32],
     ],
     0.12,
-    -0.05,
-    0.12,
+    -0.04,
+    0.1,
   );
 
-  // tailplane — a small echo of the wing near the tail
+  // all-moving tailplane
   panel(
     [
-      [-1.9, 0.2],
-      [-2.9, 1.7],
-      [-3.35, 1.7],
-      [-2.75, 0.2],
+      [-2, 0.18],
+      [-3.05, 1.8],
+      [-3.5, 1.8],
+      [-2.9, 0.18],
     ],
     0.1,
     0.02,
-    0.05,
+    0.04,
   );
 
-  // single swept vertical fin, in the x/y plane
+  // twin canted fins
   const finShape = new THREE.Shape();
   finShape.moveTo(-1.7, 0);
-  finShape.lineTo(-2.55, 1.9);
-  finShape.lineTo(-3.05, 1.9);
-  finShape.lineTo(-2.85, 0);
+  finShape.lineTo(-2.5, 1.5);
+  finShape.lineTo(-3, 1.5);
+  finShape.lineTo(-2.9, 0);
   finShape.closePath();
-  const fin = new THREE.Mesh(
-    new THREE.ExtrudeGeometry(finShape, { depth: 0.12, bevelEnabled: false }),
-    mat,
-  );
-  fin.position.z = -0.06;
-  jet.add(fin);
+  const finGeo = new THREE.ExtrudeGeometry(finShape, {
+    depth: 0.1,
+    bevelEnabled: false,
+  });
+  const finR = new THREE.Mesh(finGeo, mat);
+  finR.rotation.x = 0.4; // cant outward
+  finR.position.set(0, 0.1, 0.5);
+  jet.add(finR);
+  const finL = finR.clone();
+  finL.rotation.x = -0.4;
+  finL.position.z = -0.5;
+  jet.add(finL);
 
   new THREE.Box3().setFromObject(jet).getCenter(jet.position).negate();
   const model = new THREE.Group();
@@ -206,6 +228,7 @@ export async function createFlightPlane(
       m.geometry?.dispose();
     });
     mat.dispose();
+    dark.dispose();
     renderer.dispose();
   }
 

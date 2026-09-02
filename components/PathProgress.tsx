@@ -168,7 +168,7 @@ export function PathProgress() {
       const yDrift = flying ? 0 : ptrY * 24;
 
       // large and near at the top, shrinking away into the distance
-      const scale = 3 - 1.5 * prog;
+      const scale = 3.7 - 1.9 * prog;
 
       trace.style.strokeDashoffset = `${len - l}`;
 

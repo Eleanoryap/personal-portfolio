@@ -18,31 +18,78 @@ const CONTOURS = Array.from({ length: 7 }, (_, i) => {
 
 const STARS = (() => {
   const r = rng(7);
-  return Array.from({ length: 78 }, () => ({
-    cx: +(r() * 100).toFixed(2),
-    cy: +(r() * 100).toFixed(2),
-    rad: +(0.05 + r() * 0.16).toFixed(3),
-    o: +(0.22 + r() * 0.6).toFixed(2),
-    tw: r() > 0.72,
-    delay: +(r() * 6).toFixed(2),
+  return Array.from({ length: 118 }, () => {
+    const roll = r();
+    return {
+      cx: +(r() * 100).toFixed(2),
+      cy: +(r() * 100).toFixed(2),
+      rad: +(0.04 + r() * 0.15).toFixed(3),
+      o: +(0.2 + r() * 0.6).toFixed(2),
+      tw: r() > 0.58,
+      bright: roll > 0.92,
+      delay: +(r() * 6).toFixed(2),
+    };
+  });
+})();
+
+type CloudSpec = {
+  x: number;
+  y: number;
+  s: number;
+  dur: number;
+  delay: number;
+  o: number;
+  near: boolean;
+};
+
+const CLOUDS: CloudSpec[] = (() => {
+  const r = rng(41);
+  return Array.from({ length: 11 }, (_, i) => ({
+    x: +(-6 + r() * 94).toFixed(1),
+    y: +(3 + i * 8 + r() * 6).toFixed(1),
+    s: +(0.55 + r() * 1.3).toFixed(2),
+    dur: +(64 + r() * 90).toFixed(0),
+    delay: +(-r() * 140).toFixed(0),
+    o: +(0.3 + r() * 0.38).toFixed(2),
+    near: r() > 0.66,
   }));
 })();
 
-const CLOUDS = (() => {
-  const r = rng(41);
-  return Array.from({ length: 6 }, (_, i) => ({
-    x: +(6 + r() * 82).toFixed(1),
-    y: +(8 + i * 15 + r() * 6).toFixed(1),
-    s: +(0.7 + r() * 0.9).toFixed(2),
-    dur: +(70 + r() * 60).toFixed(0),
-    delay: +(-r() * 60).toFixed(0),
-  }));
-})();
+function Cloud({ c, gid }: { c: CloudSpec; gid: number }) {
+  return (
+    <svg
+      className="cloud"
+      viewBox="0 0 120 60"
+      style={{
+        left: `${c.x}%`,
+        top: `${c.y}%`,
+        width: `${c.s * 22}rem`,
+        opacity: c.o,
+        animationDuration: `${c.dur}s`,
+        animationDelay: `${c.delay}s`,
+      }}
+    >
+      <defs>
+        <linearGradient id={`cg${gid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.92" />
+          <stop offset="1" stopColor="#a8bccb" stopOpacity="0.3" />
+        </linearGradient>
+      </defs>
+      <g fill={`url(#cg${gid})`}>
+        <ellipse cx="42" cy="40" rx="30" ry="17" />
+        <ellipse cx="66" cy="34" rx="24" ry="20" />
+        <ellipse cx="86" cy="42" rx="22" ry="15" />
+        <ellipse cx="58" cy="46" rx="34" ry="13" />
+      </g>
+    </svg>
+  );
+}
 
 /**
- * Fixed backdrop that content scrolls over — the basis of the page's depth.
- * Navigation-chart contours in both themes; a starfield in dark, drifting soft
- * clouds in light. Parallax drift under scroll; static under reduced motion.
+ * Fixed sky the page scrolls over. Navigation-chart contours in both themes;
+ * in dark a starfield, a galactic band, the moon and drifting planets; in light
+ * the sun and drifting clouds. Three parallax layers track the cursor, and it
+ * all drifts under scroll. Everything freezes under reduced motion.
  */
 export function Backdrop() {
   const ref = useRef<HTMLDivElement>(null);
@@ -52,19 +99,45 @@ export function Backdrop() {
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    let ticking = false;
-    const update = () => {
-      ticking = false;
-      el.style.setProperty("--drift", `${window.scrollY * -0.045}px`);
+    let px = 0;
+    let py = 0;
+    let tx = 0;
+    let ty = 0;
+    let drift = 0;
+    let raf = 0;
+
+    const frame = () => {
+      px += (tx - px) * 0.06;
+      py += (ty - py) * 0.06;
+      el.style.setProperty("--px", px.toFixed(4));
+      el.style.setProperty("--py", py.toFixed(4));
+      el.style.setProperty("--drift", `${drift.toFixed(1)}px`);
+      raf =
+        Math.abs(tx - px) > 0.0006 || Math.abs(ty - py) > 0.0006
+          ? requestAnimationFrame(frame)
+          : 0;
+    };
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    const onMove = (e: PointerEvent) => {
+      tx = (e.clientX / window.innerWidth) * 2 - 1;
+      ty = (e.clientY / window.innerHeight) * 2 - 1;
+      kick();
     };
     const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(update);
+      drift = window.scrollY * -0.05;
+      kick();
     };
-    update();
+
+    onScroll();
+    window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
@@ -79,52 +152,52 @@ export function Backdrop() {
         ))}
       </svg>
 
-      <svg
-        className="backdrop__stars"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        {STARS.map((s, i) => (
-          <circle
-            key={i}
-            cx={s.cx}
-            cy={s.cy}
-            r={s.rad}
-            opacity={s.o}
-            className={s.tw ? "twinkle" : undefined}
-            style={{ animationDelay: `${s.delay}s` }}
-          />
-        ))}
-      </svg>
+      {/* far: stars, galactic band, moon / sun */}
+      <div className="plx plx--far">
+        <span className="sky-band" />
+        <svg
+          className="backdrop__stars"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          {STARS.map((s, i) => (
+            <circle
+              key={i}
+              cx={s.cx}
+              cy={s.cy}
+              r={s.rad}
+              opacity={s.o}
+              className={`${s.tw ? "twinkle " : ""}${s.bright ? "star--bright" : ""}`}
+              style={{ animationDelay: `${s.delay}s` }}
+            />
+          ))}
+        </svg>
+        <span className="orb orb--moon" />
+        <span className="orb orb--sun">
+          <span className="orb__rays" />
+        </span>
+      </div>
 
-      <div className="backdrop__clouds">
-        {CLOUDS.map((c, i) => (
-          <svg
-            key={i}
-            className="cloud"
-            viewBox="0 0 120 60"
-            style={{
-              left: `${c.x}%`,
-              top: `${c.y}%`,
-              width: `${c.s * 22}rem`,
-              animationDuration: `${c.dur}s`,
-              animationDelay: `${c.delay}s`,
-            }}
-          >
-            <defs>
-              <linearGradient id={`cg${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#ffffff" stopOpacity="0.9" />
-                <stop offset="1" stopColor="#9fb2c0" stopOpacity="0.28" />
-              </linearGradient>
-            </defs>
-            <g fill={`url(#cg${i})`}>
-              <ellipse cx="42" cy="40" rx="30" ry="17" />
-              <ellipse cx="66" cy="34" rx="24" ry="20" />
-              <ellipse cx="86" cy="42" rx="22" ry="15" />
-              <ellipse cx="58" cy="46" rx="34" ry="13" />
-            </g>
-          </svg>
-        ))}
+      {/* mid: planets and high clouds */}
+      <div className="plx plx--mid">
+        <span className="planet planet--a" />
+        <span className="planet planet--b" />
+        <div className="backdrop__clouds">
+          {CLOUDS.filter((c) => !c.near).map((c, i) => (
+            <Cloud key={i} c={c} gid={i} />
+          ))}
+        </div>
+      </div>
+
+      {/* near: foreground clouds and comets */}
+      <div className="plx plx--near">
+        <span className="comet comet--a" />
+        <span className="comet comet--b" />
+        <div className="backdrop__clouds">
+          {CLOUDS.filter((c) => c.near).map((c, i) => (
+            <Cloud key={i} c={c} gid={i + 40} />
+          ))}
+        </div>
       </div>
     </div>
   );
