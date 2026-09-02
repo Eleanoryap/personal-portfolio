@@ -87,33 +87,43 @@ export function PathProgress() {
       const h = Math.max(1, wrap.clientHeight);
       const vh = window.innerHeight;
 
-      const startY = vh * 0.62; // hovers here, below the name, until scroll
-      const flareY = h - vh * 0.46; // the descent eases into a long glide here
-      const restY = h - vh * 0.22; // and finally hovers here, clear of the footer
-      const amp = Math.min(w * 0.44, w / 2 - 70);
+      /* ============================================================
+       *  FLIGHT-PATH SHAPE — tune these
+       *  All of it is one smooth function x(f) sampled densely, so the
+       *  curve has no kinks. f goes 0 (top) → 1 (bottom of the weave).
+       * ============================================================ */
+      const startY = vh * 0.62; //  where the plane rests, below the name
+      const flareY = h - vh * 0.46; //  where the weave ends and the glide begins
+      const restY = h - vh * 0.22; //  where it finally hovers (clear of the footer)
+      const amp = Math.min(w * 0.44, w / 2 - 70); //  half the side-to-side swing
+      //  one half-swing per ~1.5 screens of descent, so the diagonal stays
+      //  the same gentleness however tall the page is. ↓ 1.5 = more curves.
+      const SWINGS = Math.max(
+        3,
+        Math.round((flareY - startY) / (vh * 1.5)),
+      );
+      const PHASE = 0; //  0 = starts dead-centre; ↑ = starts already swung right
+      //                    (but then the plane no longer rests centred)
+      const AMP_FLOOR = 0.45; //  swing width kept near the top/bottom
+      //                          (↑ = wider/less steep there, ↓ = eases in gentler)
+      const STEPS = SWINGS * 20; //  sampling density — leave high for a smooth line
 
-      // lead in with a wide, shallow sweep out to the right before the weave
-      const pts: Array<{ x: number; y: number }> = [
-        { x: w / 2, y: startY },
-        { x: w / 2 + amp * 0.85, y: startY + (flareY - startY) * 0.12 },
-      ];
-
-      // then a smooth multi-curve weave down the page — four half-swings,
-      // densely sampled so every reversal stays a rounded sweep, picking up
-      // from the rightward lead-in
-      const SWINGS = 4;
-      const STEPS = 56;
-      for (let k = 1; k <= STEPS; k++) {
-        const f = 0.12 + (k / STEPS) * 0.88;
+      const pts: Array<{ x: number; y: number }> = [];
+      for (let k = 0; k <= STEPS; k++) {
+        const f = k / STEPS;
         const y = startY + (flareY - startY) * f;
-        const env = 0.82 + 0.18 * Math.sin(f * Math.PI);
-        pts.push({ x: w / 2 + Math.sin(f * Math.PI * SWINGS) * amp * env, y });
+        // amplitude tapers gently at the very ends so the plane eases in / out
+        const env = AMP_FLOOR + (1 - AMP_FLOOR) * Math.sin(f * Math.PI);
+        pts.push({
+          x: w / 2 + Math.sin(PHASE + f * Math.PI * SWINGS) * amp * env,
+          y,
+        });
       }
 
-      // a short, gentle glide straight down the centre onto the touchdown —
-      // every point still descends so the plane keeps moving to the very end
-      pts.push({ x: w / 2 - amp * 0.14, y: flareY + (restY - flareY) * 0.5 });
-      pts.push({ x: w / 2 - amp * 0.04, y: restY - vh * 0.11 });
+      // the weave already ends at centre — just settle straight down onto the
+      // touchdown (a couple of centred points so the tangent eases to vertical)
+      pts.push({ x: w / 2, y: flareY + (restY - flareY) * 0.45 });
+      pts.push({ x: w / 2, y: flareY + (restY - flareY) * 0.8 });
       pts.push({ x: w / 2, y: restY });
 
       const d = smoothPath(pts);
