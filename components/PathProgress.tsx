@@ -29,7 +29,6 @@ function smoothPath(pts: Array<{ x: number; y: number }>) {
 }
 
 const DEG = 180 / Math.PI;
-const CONTENT_W = 576; // .doc max-width (36rem)
 const SAMPLES = 260;
 
 function norm(a: number) {
@@ -93,18 +92,18 @@ export function PathProgress() {
       const startY = vh * 0.62; // hovers here, below the name, until scroll
       const flareY = h - vh * 0.5; // the descent eases into a level glide here
       const restY = h - vh * 0.16; // and finally hovers here at the foot
-      const amp = Math.min(w * 0.34, (w - CONTENT_W) / 2 + 96);
+      // swing nearly the full width, so the plane really crosses the screen
+      const amp = Math.min(w * 0.42, w / 2 - 100);
 
       const pts: Array<{ x: number; y: number }> = [{ x: w / 2, y: startY }];
 
-      // one long, lazy S: ~2 gentle swings, amplitude eased in at the top and
-      // back out toward the landing, so the nose is never straight down for
-      // more than an instant
-      const STEPS = 10;
+      // one long, lazy S: ~2 wide swings, the amplitude only tapering near the
+      // very top and the landing, so the nose is never straight down for long
+      const STEPS = 12;
       for (let k = 1; k <= STEPS; k++) {
         const f = k / STEPS;
         const y = startY + (flareY - startY) * f;
-        const env = Math.sin(f * Math.PI); // 0 → 1 → 0 across the descent
+        const env = Math.sin(f * Math.PI) ** 0.55; // full through the middle
         const x = w / 2 + Math.sin(0.5 + f * Math.PI * 2.1) * amp * env;
         pts.push({ x, y });
       }
