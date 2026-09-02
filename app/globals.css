@@ -578,10 +578,13 @@
   .brand--home {
     font-size: clamp(1.7rem, 8vw, 5.25rem);
     letter-spacing: -0.015em;
-    background-color: var(--color-sky);
-    box-shadow:
-      0 0 0 14px var(--color-sky),
-      0 0 34px 26px var(--color-sky);
+    /* a soft halo in the page colour rather than a plate, so nothing boxy
+       sweeps across the sky while the name travels to the corner */
+    text-shadow:
+      0 0 5px var(--color-sky),
+      0 0 12px var(--color-sky),
+      0 0 22px var(--color-sky),
+      0 0 22px var(--color-sky);
     transform-origin: top left;
     /* rest position = centred: shift the top-left corner by
        (half viewport − corner offset − half element). */
@@ -601,7 +604,7 @@
   }
   :root[data-intro][data-loaded] .brand--home {
     opacity: 1;
-    clip-path: inset(-14% 0 -14% 0);
+    clip-path: inset(-22% 0 -22% 0);
   }
   :root[data-scrolled] .brand--home {
     font-size: 1.15rem;
@@ -610,10 +613,10 @@
   .brand--case {
     font-size: 1.1rem;
     padding: 3px 6px;
-    background-color: var(--color-sky);
-    box-shadow:
-      0 0 0 6px var(--color-sky),
-      0 0 16px 12px var(--color-sky);
+    text-shadow:
+      0 0 5px var(--color-sky),
+      0 0 12px var(--color-sky),
+      0 0 12px var(--color-sky);
   }
 
   /* ---- 3-D block name (hero only) ------------------------------ */

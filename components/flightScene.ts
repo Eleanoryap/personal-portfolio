@@ -105,27 +105,22 @@ export async function createFlightPlane(
   canopy.position.set(1.45, 0.36, 0);
   jet.add(canopy);
 
-  // helper: a flat swept panel in the x/z plane, mirrored across the fuselage
-  const panel = (
-    pts: Array<[number, number]>,
-    depth: number,
-    y: number,
-    dihedral: number,
-  ) => {
+  // helper: a flat panel (shape = chord × span, thin in y), one mesh per side.
+  // The two sides differ only by the sign of the −90°/+90° x-rotation, so the
+  // span maps to −z and +z respectively — no mirrored scale, no flipped normals.
+  const panel = (pts: Array<[number, number]>, depth: number, y: number) => {
     const s = new THREE.Shape();
     s.moveTo(pts[0][0], pts[0][1]);
     for (let k = 1; k < pts.length; k++) s.lineTo(pts[k][0], pts[k][1]);
     s.closePath();
     const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false });
-    const r = new THREE.Mesh(g, mat);
-    r.rotation.x = -Math.PI / 2;
-    r.rotation.z = dihedral;
-    r.position.set(0, y, 0);
-    jet.add(r);
-    const li = r.clone();
-    li.scale.z = -1;
-    li.rotation.z = -dihedral;
-    jet.add(li);
+    g.translate(0, 0, -depth / 2); // centre the thickness on the fuselage
+    for (const side of [-1, 1]) {
+      const m = new THREE.Mesh(g, mat);
+      m.rotation.x = (side * Math.PI) / 2;
+      m.position.y = y;
+      jet.add(m);
+    }
   };
 
   // main wings — blended root extension sweeping back to a raked tip
@@ -138,7 +133,6 @@ export async function createFlightPlane(
     ],
     0.12,
     -0.04,
-    0.1,
   );
 
   // all-moving tailplane
@@ -151,7 +145,6 @@ export async function createFlightPlane(
     ],
     0.1,
     0.02,
-    0.04,
   );
 
   // twin canted fins
