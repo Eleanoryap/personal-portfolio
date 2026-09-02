@@ -2,24 +2,28 @@
 
 import { useEffect, useRef } from "react";
 
-// puffs scattered through the fog band for texture (percent positions)
+// a band of clouds straddling the hero → statement seam. Percent positions
+// within the band; s scales the cloud, lo/hi shade its underside/top.
 const PUFFS = [
-  { x: 6, y: 26, s: 1.7, o: 0.9 },
-  { x: 54, y: 20, s: 2.1, o: 0.85 },
-  { x: 28, y: 44, s: 2.4, o: 0.95 },
-  { x: 72, y: 50, s: 1.8, o: 0.82 },
-  { x: -8, y: 58, s: 2.2, o: 0.9 },
-  { x: 44, y: 66, s: 2.6, o: 0.92 },
-  { x: 82, y: 36, s: 1.9, o: 0.8 },
-  { x: 16, y: 72, s: 2.0, o: 0.86 },
-  { x: 62, y: 78, s: 2.3, o: 0.88 },
+  { x: 2, y: 20, s: 1.5 },
+  { x: 40, y: 12, s: 1.9 },
+  { x: 74, y: 22, s: 1.6 },
+  { x: 20, y: 40, s: 2.2 },
+  { x: 58, y: 44, s: 2.0 },
+  { x: 86, y: 40, s: 1.5 },
+  { x: -6, y: 56, s: 1.9 },
+  { x: 34, y: 66, s: 2.3 },
+  { x: 66, y: 62, s: 1.8 },
+  { x: 4, y: 82, s: 1.7 },
+  { x: 48, y: 86, s: 2.1 },
+  { x: 80, y: 80, s: 1.6 },
 ];
 
 /**
- * A bank of cloud rushing up past the viewport on the first scroll — it fills
- * the screen as the hero clears, then lifts away to reveal the first section,
- * like descending through a cloud layer. Scroll-driven; skipped entirely under
- * reduced motion (the content just scrolls in as normal).
+ * A cloud bank across the seam between the hero and the first section. It sits
+ * roughly where the two meet, so as the hero scrolls off the top the statement
+ * is revealed emerging beneath it — like coming down through a cloud layer.
+ * Drifts up a little faster than the scroll. Skipped under reduced motion.
  */
 export function CloudVeil() {
   const ref = useRef<HTMLDivElement>(null);
@@ -33,18 +37,15 @@ export function CloudVeil() {
     const apply = () => {
       raf = 0;
       const vh = window.innerHeight;
-      // 0 → 1 across the first screen of scroll, finishing as the hero clears
       const p = Math.max(
         0,
-        Math.min(1, (window.scrollY - vh * 0.14) / (vh * 0.82)),
+        Math.min(1.4, (window.scrollY - vh * 0.15) / (vh * 1.1)),
       );
-      el.style.setProperty("--p", p.toFixed(4));
-      el.style.visibility = p <= 0 || p >= 1 ? "hidden" : "visible";
+      el.style.setProperty("--p", p.toFixed(3));
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(apply);
     };
-
     apply();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", apply);
@@ -57,28 +58,33 @@ export function CloudVeil() {
 
   return (
     <div className="cloud-veil" ref={ref} aria-hidden="true">
-      <div className="cloud-veil__band">
-        {PUFFS.map((c, i) => (
-          <svg
-            key={i}
-            className="cloud-veil__puff"
-            viewBox="0 0 120 60"
-            style={{
-              left: `${c.x}%`,
-              top: `${c.y}%`,
-              width: `${c.s * 26}rem`,
-              opacity: c.o,
-            }}
-          >
-            <g>
-              <ellipse cx="42" cy="40" rx="30" ry="17" />
-              <ellipse cx="66" cy="34" rx="24" ry="20" />
-              <ellipse cx="86" cy="42" rx="22" ry="15" />
-              <ellipse cx="58" cy="46" rx="34" ry="13" />
-            </g>
-          </svg>
-        ))}
-      </div>
+      {PUFFS.map((c, i) => (
+        <svg
+          key={i}
+          className="cloud-veil__puff"
+          viewBox="0 0 120 62"
+          style={{
+            left: `${c.x}%`,
+            top: `${c.y}%`,
+            width: `${c.s * 24}rem`,
+          }}
+        >
+          <defs>
+            <linearGradient id={`veil${i}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="var(--veil-hi)" />
+              <stop offset="0.55" stopColor="var(--veil-mid)" />
+              <stop offset="1" stopColor="var(--veil-lo)" />
+            </linearGradient>
+          </defs>
+          <g fill={`url(#veil${i})`}>
+            <ellipse cx="40" cy="42" rx="30" ry="16" />
+            <ellipse cx="64" cy="34" rx="26" ry="22" />
+            <ellipse cx="88" cy="44" rx="22" ry="15" />
+            <ellipse cx="24" cy="46" rx="22" ry="13" />
+            <ellipse cx="58" cy="48" rx="38" ry="12" />
+          </g>
+        </svg>
+      ))}
     </div>
   );
 }

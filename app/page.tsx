@@ -19,9 +19,9 @@ export default function HomePage() {
   return (
     <>
       <HomeChrome />
-      <CloudVeil />
 
       <div className="relative">
+        <CloudVeil />
         <PathProgress />
         <main className="doc doc--hero pb-[28vh]">
           <Section id="statement" label="Statement" title="Statement" hideTitle>

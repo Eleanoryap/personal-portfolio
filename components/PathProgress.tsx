@@ -88,29 +88,34 @@ export function PathProgress() {
       const vh = window.innerHeight;
 
       const startY = vh * 0.62; // hovers here, below the name, until scroll
-      const flareY = h - vh * 0.44; // the descent eases into a level glide here
-      const restY = h - vh * 0.22; // and finally hovers here, clear of the footer
+      const flareY = h - vh * 0.46; // the descent eases into a long glide here
+      const restY = h - vh * 0.24; // and finally hovers here, clear of the footer
       // swing nearly the full width, so the plane really crosses the screen
       const amp = Math.min(w * 0.42, w / 2 - 100);
 
       const pts: Array<{ x: number; y: number }> = [{ x: w / 2, y: startY }];
 
-      // one long, lazy S — three unhurried swings, amplitude only tapering at
-      // the very top and into the landing, so the nose is never straight down
-      const STEPS = 16;
+      // a triangle weave, not a sine — the plane crosses at a constant, gentle
+      // diagonal instead of nosing over the top of each swing; bezier smoothing
+      // rounds the reversals at the margins
+      // one swing per ~1.3 screens of descent, so the diagonal stays gentle
+      // however tall the page is
+      const SWINGS = Math.max(2, Math.round((flareY - startY) / (vh * 1.3)));
+      const STEPS = SWINGS * 6;
+      const tri = (s: number) => Math.abs((((s % 2) + 2) % 2) - 1) * 2 - 1;
       for (let k = 1; k <= STEPS; k++) {
         const f = k / STEPS;
         const y = startY + (flareY - startY) * f;
-        const env = Math.sin(f * Math.PI) ** 0.5; // full through the middle
-        const x = w / 2 + Math.sin(0.4 + f * Math.PI * 2.9) * amp * env;
-        pts.push({ x, y });
+        // keep a wide swing even near the ends, so it never noses over steeply
+        const env = 0.68 + 0.32 * Math.sin(f * Math.PI) ** 0.6;
+        pts.push({ x: w / 2 + tri(f * SWINGS - 0.5) * amp * env, y });
       }
 
-      // flare: bank round, level off, then settle to a centred hover point —
-      // the last two points share a y so the plane arrives (and holds) flat,
-      // right at the end of its own contrail
-      pts.push({ x: w / 2 - amp * 0.5, y: flareY + (restY - flareY) * 0.62 });
-      pts.push({ x: w / 2 - amp * 0.08, y: restY });
+      // flare wide, then a long shallow glide onto a centred touchdown — every
+      // point still descends, so the plane keeps moving smoothly to the end of
+      // its own contrail rather than snapping across a flat run
+      pts.push({ x: w / 2 - amp * 0.5, y: flareY + (restY - flareY) * 0.44 });
+      pts.push({ x: w / 2 - amp * 0.24, y: restY - vh * 0.1 });
       pts.push({ x: w / 2, y: restY });
 
       const d = smoothPath(pts);
@@ -182,7 +187,9 @@ export function PathProgress() {
       bank += (tRoll - bank) * (tight ? 0.12 : 0.09);
       pitch = norm(pitch + norm(tPitch - pitch) * (landed ? 0.16 : 0.09));
 
-      const tScale = landed ? 2.1 : 3.7 - 1.9 * prog;
+      // flying scale eases down to exactly the landed size, so touchdown
+      // doesn't pop or lurch
+      const tScale = landed ? 2.1 : 3.7 - 1.6 * prog;
       curScale += (tScale - curScale) * 0.08;
 
       // ---- screen position (the plane rides the path; at the foot it just

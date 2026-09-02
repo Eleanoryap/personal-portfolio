@@ -300,13 +300,19 @@
   .sky-toggle__orb {
     position: absolute;
     top: 7vh;
-    left: 62%;
+    right: 11vw;
     aspect-ratio: 1;
     padding: 0;
     border: 0;
     border-radius: 50%;
     appearance: none;
-    transition: filter 0.2s ease;
+    transition:
+      filter 0.2s ease,
+      opacity 0.45s ease;
+  }
+  .sky-toggle[data-gone] .sky-toggle__orb {
+    opacity: 0;
+    pointer-events: none;
   }
   .sky-toggle__orb--moon,
   .sky-toggle__orb--sun {
@@ -878,43 +884,46 @@
     }
   }
 
-  /* ---- Cloud veil (hero → content transition) ----------------- */
+  /* ---- Cloud veil: a bank across the hero → statement seam --------- */
   .cloud-veil {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 40; /* over the content + plane, under the corner furniture */
+    --veil-hi: #ffffff;
+    --veil-mid: #dfe7ee;
+    --veil-lo: #aebccb; /* a real shadow, so the shapes read in light mode */
+    position: absolute;
+    left: -8%;
+    right: -8%;
+    top: 60svh; /* the band straddles where the hero meets the statement */
+    height: 84vh;
+    z-index: 5; /* over the content + plane, under the corner chrome */
     pointer-events: none;
     overflow: hidden;
-  }
-  .cloud-veil__band {
-    --veil: var(--color-paper);
-    position: absolute;
-    left: -12%;
-    right: -12%;
-    top: -60vh;
-    height: 220vh;
-    /* driven from the viewport bottom (p=0) up past the top (p=1) */
-    transform: translateY(calc((0.5 - var(--p, 0)) * 220vh));
-    background: linear-gradient(
+    /* drifts up a touch faster than the page — like flying through it */
+    transform: translateY(calc(var(--p, 0) * -26vh));
+    -webkit-mask-image: linear-gradient(
       180deg,
-      transparent 2%,
-      var(--veil) 26%,
-      var(--veil) 74%,
-      transparent 98%
+      transparent,
+      #000 20%,
+      #000 72%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      180deg,
+      transparent,
+      #000 20%,
+      #000 72%,
+      transparent
     );
     will-change: transform;
   }
-  :root[data-theme="dark"] .cloud-veil__band {
-    --veil: color-mix(in srgb, var(--color-ink-muted) 52%, var(--color-sky));
+  :root[data-theme="dark"] .cloud-veil {
+    --veil-hi: #6a7889;
+    --veil-mid: #4a5666;
+    --veil-lo: #333d4b;
   }
   .cloud-veil__puff {
     position: absolute;
     height: auto;
-    filter: blur(7px);
-    fill: color-mix(in srgb, var(--veil) 80%, #fff);
+    filter: blur(2px) drop-shadow(0 10px 16px rgba(60, 78, 98, 0.22));
   }
   @media (prefers-reduced-motion: reduce) {
     .cloud-veil {
