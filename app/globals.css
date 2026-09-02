@@ -159,109 +159,19 @@
     transform: rotate(-22deg);
   }
 
-  /* ---- celestial bodies ---- */
-  .orb {
-    position: absolute;
-    aspect-ratio: 1;
-    border-radius: 50%;
-  }
-  .orb--moon,
+  /* ---- planets + comets (dark, decorative) ---- */
   .planet,
   .comet {
     display: none;
   }
-  :root[data-theme="dark"] .orb--moon,
   :root[data-theme="dark"] .planet,
   :root[data-theme="dark"] .comet {
     display: block;
   }
-  .orb--sun {
-    display: none;
-  }
-  :root[data-theme="light"] .orb--sun {
-    display: block;
-  }
-
-  .orb--moon {
-    width: clamp(66px, 8.5vw, 116px);
-    left: 54%;
-    top: 25%;
-    background: radial-gradient(
-      circle at 38% 34%,
-      #f4f7fa,
-      #d2dbe3 52%,
-      #aeb9c4 76%,
-      #95a1ac
-    );
-    box-shadow:
-      0 0 42px 10px rgba(206, 220, 233, 0.2),
-      0 0 130px 46px rgba(150, 172, 194, 0.1);
-    animation: orb-float 15s ease-in-out infinite;
-  }
-  .orb--moon::before,
-  .orb--moon::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(120, 133, 146, 0.3);
-  }
-  .orb--moon::before {
-    width: 24%;
-    height: 24%;
-    left: 21%;
-    top: 27%;
-  }
-  .orb--moon::after {
-    width: 15%;
-    height: 15%;
-    left: 56%;
-    top: 58%;
-    box-shadow: -0.9em -0.7em 0 -0.32em rgba(120, 133, 146, 0.26);
-  }
-
-  .orb--sun {
-    width: clamp(74px, 10vw, 134px);
-    left: 54%;
-    top: 22%;
-    background: radial-gradient(
-      circle at 50% 46%,
-      #fff7ea,
-      #ffe6bd 46%,
-      #ffcf95 72%,
-      #f7b070
-    );
-    box-shadow:
-      0 0 54px 16px rgba(255, 210, 150, 0.36),
-      0 0 150px 66px rgba(255, 188, 120, 0.16);
-    animation: orb-pulse 7s ease-in-out infinite;
-  }
-  .orb__rays {
-    position: absolute;
-    inset: -52%;
-    border-radius: 50%;
-    background: repeating-conic-gradient(
-      from 0deg,
-      color-mix(in srgb, var(--color-signal) 13%, transparent) 0 1.6deg,
-      transparent 1.6deg 15deg
-    );
-    -webkit-mask: radial-gradient(
-      circle,
-      transparent 44%,
-      #000 50%,
-      #000 70%,
-      transparent 80%
-    );
-    mask: radial-gradient(
-      circle,
-      transparent 44%,
-      #000 50%,
-      #000 70%,
-      transparent 80%
-    );
-    animation: spin 140s linear infinite;
-  }
 
   .planet {
+    position: absolute;
+    aspect-ratio: 1;
     border-radius: 50%;
   }
   .planet--a {
@@ -380,6 +290,136 @@
     }
   }
 
+  /* ---- SkyToggle: the moon / sun, and it doubles as the theme control -- */
+  .sky-toggle {
+    position: fixed;
+    inset: 0;
+    z-index: 46; /* over the cloud veil + theme wipe, under the corner chrome */
+    pointer-events: none;
+  }
+  .sky-toggle__orb {
+    position: absolute;
+    top: 7vh;
+    left: 62%;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    appearance: none;
+    transition: filter 0.2s ease;
+  }
+  .sky-toggle__orb--moon,
+  .sky-toggle__orb--sun {
+    display: none;
+  }
+  :root[data-theme="dark"] .sky-toggle__orb--moon,
+  :root[data-theme="light"] .sky-toggle__orb--sun {
+    display: block;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .sky-toggle__orb:hover {
+    filter: brightness(1.08);
+  }
+  .sky-toggle__orb:focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 8px;
+  }
+  .sky-toggle__orb--moon {
+    width: clamp(54px, 7vw, 98px);
+    background: radial-gradient(
+      circle at 38% 34%,
+      #f4f7fa,
+      #d2dbe3 52%,
+      #aeb9c4 76%,
+      #95a1ac
+    );
+    box-shadow:
+      0 0 42px 10px rgba(206, 220, 233, 0.2),
+      0 0 130px 46px rgba(150, 172, 194, 0.1);
+    animation: orb-float 15s ease-in-out infinite;
+  }
+  .sky-toggle__orb--moon::before,
+  .sky-toggle__orb--moon::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(120, 133, 146, 0.3);
+  }
+  .sky-toggle__orb--moon::before {
+    width: 24%;
+    height: 24%;
+    left: 21%;
+    top: 27%;
+  }
+  .sky-toggle__orb--moon::after {
+    width: 15%;
+    height: 15%;
+    left: 56%;
+    top: 58%;
+    box-shadow: -0.9em -0.7em 0 -0.32em rgba(120, 133, 146, 0.26);
+  }
+  .sky-toggle__orb--sun {
+    width: clamp(62px, 8vw, 112px);
+    background: radial-gradient(
+      circle at 50% 46%,
+      #fff7ea,
+      #ffe6bd 46%,
+      #ffcf95 72%,
+      #f7b070
+    );
+    box-shadow:
+      0 0 54px 16px rgba(255, 210, 150, 0.36),
+      0 0 150px 66px rgba(255, 188, 120, 0.16);
+    animation: orb-pulse 7s ease-in-out infinite;
+  }
+  .sky-toggle__rays {
+    position: absolute;
+    inset: -52%;
+    pointer-events: none;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+      from 0deg,
+      color-mix(in srgb, var(--color-signal) 13%, transparent) 0 1.6deg,
+      transparent 1.6deg 15deg
+    );
+    -webkit-mask: radial-gradient(
+      circle,
+      transparent 44%,
+      #000 50%,
+      #000 70%,
+      transparent 80%
+    );
+    mask: radial-gradient(
+      circle,
+      transparent 44%,
+      #000 50%,
+      #000 70%,
+      transparent 80%
+    );
+    animation: spin 140s linear infinite;
+  }
+
+  /* ---- theme wipe: an iris of the old sky colour collapsing to the click - */
+  #theme-wipe {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    pointer-events: none;
+    clip-path: circle(0% at var(--wx, 50%) var(--wy, 22%));
+  }
+  #theme-wipe.is-wiping {
+    animation: theme-wipe 0.72s cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+  @keyframes theme-wipe {
+    from {
+      clip-path: circle(150% at var(--wx) var(--wy));
+    }
+    to {
+      clip-path: circle(0% at var(--wx) var(--wy));
+    }
+  }
+
   /* ---- clouds (light) ---- */
   .backdrop__clouds {
     display: none;
@@ -413,9 +453,9 @@
     .backdrop__contours,
     .backdrop__stars .twinkle,
     .backdrop .cloud,
-    .orb--moon,
-    .orb--sun,
-    .orb__rays,
+    .sky-toggle__orb--moon,
+    .sky-toggle__orb--sun,
+    .sky-toggle__rays,
     .planet,
     .comet {
       animation: none;
@@ -427,6 +467,9 @@
     .plx--mid,
     .plx--near {
       transform: none;
+    }
+    #theme-wipe.is-wiping {
+      animation: none;
     }
   }
 

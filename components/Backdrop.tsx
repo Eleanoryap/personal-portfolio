@@ -87,8 +87,9 @@ function Cloud({ c, gid }: { c: CloudSpec; gid: number }) {
 
 /**
  * Fixed sky the page scrolls over. Navigation-chart contours in both themes;
- * in dark a starfield, a galactic band, the moon and drifting planets; in light
- * the sun and drifting clouds. Three parallax layers track the cursor, and it
+ * in dark a starfield, a galactic band and drifting planets; in light drifting
+ * clouds. (The moon / sun are the theme control — see SkyToggle.) Three
+ * parallax layers track the cursor, and it
  * all drifts under scroll. Everything freezes under reduced motion.
  */
 export function Backdrop() {
@@ -152,7 +153,7 @@ export function Backdrop() {
         ))}
       </svg>
 
-      {/* far: stars, galactic band, moon / sun */}
+      {/* far: stars + galactic band (the moon / sun live in SkyToggle) */}
       <div className="plx plx--far">
         <span className="sky-band" />
         <svg
@@ -172,10 +173,6 @@ export function Backdrop() {
             />
           ))}
         </svg>
-        <span className="orb orb--moon" />
-        <span className="orb orb--sun">
-          <span className="orb__rays" />
-        </span>
       </div>
 
       {/* mid: planets and high clouds */}
