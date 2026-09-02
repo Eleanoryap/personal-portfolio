@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CloudVeil } from "@/components/CloudVeil";
 import { HomeChrome } from "@/components/HomeChrome";
 import { PathProgress } from "@/components/PathProgress";
 import { ReplayIntro } from "@/components/ReplayIntro";
@@ -18,6 +19,7 @@ export default function HomePage() {
   return (
     <>
       <HomeChrome />
+      <CloudVeil />
 
       <div className="relative">
         <PathProgress />

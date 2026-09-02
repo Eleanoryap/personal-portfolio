@@ -770,6 +770,50 @@
     }
   }
 
+  /* ---- Cloud veil (hero → content transition) ----------------- */
+  .cloud-veil {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 40; /* over the content + plane, under the corner furniture */
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .cloud-veil__band {
+    --veil: var(--color-paper);
+    position: absolute;
+    left: -12%;
+    right: -12%;
+    top: -60vh;
+    height: 220vh;
+    /* driven from the viewport bottom (p=0) up past the top (p=1) */
+    transform: translateY(calc((0.5 - var(--p, 0)) * 220vh));
+    background: linear-gradient(
+      180deg,
+      transparent 2%,
+      var(--veil) 26%,
+      var(--veil) 74%,
+      transparent 98%
+    );
+    will-change: transform;
+  }
+  :root[data-theme="dark"] .cloud-veil__band {
+    --veil: color-mix(in srgb, var(--color-ink-muted) 52%, var(--color-sky));
+  }
+  .cloud-veil__puff {
+    position: absolute;
+    height: auto;
+    filter: blur(7px);
+    fill: color-mix(in srgb, var(--veil) 80%, #fff);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cloud-veil {
+      display: none;
+    }
+  }
+
   /* ---- Document column ---------------------------------------- */
   .doc {
     position: relative;
