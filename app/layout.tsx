@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
 import { Backdrop } from "@/components/Backdrop";
 import { LoaderController } from "@/components/LoaderController";
+import { MusicPlayer } from "@/components/MusicPlayer";
 import { RevealObserver } from "@/components/RevealObserver";
 import { SkyToggle } from "@/components/SkyToggle";
 import { site } from "@/content/site";
@@ -59,6 +60,7 @@ export default function RootLayout({
 
         <Backdrop />
         <SkyToggle />
+        <MusicPlayer />
         {children}
       </body>
     </html>

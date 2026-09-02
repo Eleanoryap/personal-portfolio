@@ -420,6 +420,68 @@
     }
   }
 
+  /* ---- ambient sound toggle ---------------------------------- */
+  .music {
+    position: fixed;
+    left: 24px;
+    bottom: 46px;
+    z-index: 62;
+  }
+  .music--off {
+    display: none;
+  }
+  .music__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 4px 4px 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+  .music__btn:hover {
+    color: var(--color-ink);
+  }
+  .music__disc {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 50%;
+    border: 1px solid var(--color-hairline);
+    background: repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 1.4px,
+      color-mix(in srgb, var(--color-hairline) 60%, transparent) 1.4px 2.6px
+    );
+  }
+  .music__disc::after {
+    content: "";
+    position: absolute;
+    inset: 38%;
+    border-radius: 50%;
+    background: var(--color-signal);
+  }
+  .music__disc.is-spinning {
+    animation: spin 3.6s linear infinite;
+  }
+  @media (max-width: 40rem) {
+    .music {
+      left: 16px;
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .music__disc.is-spinning {
+      animation: none;
+    }
+  }
+
   /* ---- clouds (light) ---- */
   .backdrop__clouds {
     display: none;
