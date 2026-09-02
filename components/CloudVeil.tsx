@@ -5,18 +5,18 @@ import { useEffect, useRef } from "react";
 // a band of clouds straddling the hero → statement seam. Percent positions
 // within the band; s scales the cloud, lo/hi shade its underside/top.
 const PUFFS = [
-  { x: 2, y: 20, s: 1.5 },
-  { x: 40, y: 12, s: 1.9 },
-  { x: 74, y: 22, s: 1.6 },
-  { x: 20, y: 40, s: 2.2 },
-  { x: 58, y: 44, s: 2.0 },
-  { x: 86, y: 40, s: 1.5 },
-  { x: -6, y: 56, s: 1.9 },
-  { x: 34, y: 66, s: 2.3 },
-  { x: 66, y: 62, s: 1.8 },
-  { x: 4, y: 82, s: 1.7 },
-  { x: 48, y: 86, s: 2.1 },
-  { x: 80, y: 80, s: 1.6 },
+  { x: 2, y: 10, s: 1.5 },
+  { x: 40, y: 5, s: 1.9 },
+  { x: 74, y: 12, s: 1.6 },
+  { x: 20, y: 24, s: 2.2 },
+  { x: 58, y: 26, s: 2.0 },
+  { x: 86, y: 22, s: 1.5 },
+  { x: -6, y: 36, s: 1.9 },
+  { x: 34, y: 42, s: 2.3 },
+  { x: 66, y: 40, s: 1.8 },
+  { x: 4, y: 52, s: 1.7 },
+  { x: 48, y: 54, s: 2.1 },
+  { x: 80, y: 50, s: 1.6 },
 ];
 
 /**

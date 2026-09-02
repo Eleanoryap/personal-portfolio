@@ -722,7 +722,13 @@
   }
   :root[data-scrolled] .brand--home {
     font-size: 1.15rem;
-    transform: translate(0, 0);
+    /* settle into a padded plate in the corner (offset back so the text still
+       lands at the corner origin) */
+    transform: translate(-10px, -6px);
+    padding: 6px 10px;
+    background-color: var(--color-sky);
+    border-radius: 3px;
+    text-shadow: none;
   }
   .brand--case {
     font-size: 1.1rem;
@@ -892,26 +898,26 @@
     position: absolute;
     left: -8%;
     right: -8%;
-    top: 60svh; /* the band straddles where the hero meets the statement */
-    height: 84vh;
+    top: 48svh; /* the dense cloud sits over the departing hero, not the statement */
+    height: 74vh;
     z-index: 5; /* over the content + plane, under the corner chrome */
     pointer-events: none;
     overflow: hidden;
-    /* drifts up a touch faster than the page — like flying through it */
-    transform: translateY(calc(var(--p, 0) * -26vh));
+    /* drifts up faster than the page — clears the statement quickly */
+    transform: translateY(calc(var(--p, 0) * -38vh));
     -webkit-mask-image: linear-gradient(
       180deg,
       transparent,
-      #000 20%,
-      #000 72%,
-      transparent
+      #000 14%,
+      #000 52%,
+      transparent 84%
     );
     mask-image: linear-gradient(
       180deg,
       transparent,
-      #000 20%,
-      #000 72%,
-      transparent
+      #000 14%,
+      #000 52%,
+      transparent 84%
     );
     will-change: transform;
   }
@@ -1087,6 +1093,9 @@
     :root[data-scrolled] .brand--home {
       transform: translate(0, 0);
       font-size: 1rem;
+      /* the mobile top bar is already a solid plate — no plate on the name */
+      padding: 0;
+      background-color: transparent;
     }
     .brand--case {
       font-size: 1rem;
