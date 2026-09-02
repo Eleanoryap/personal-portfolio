@@ -124,8 +124,13 @@ export async function createNameBlocks(
     geo.computeBoundingBox();
     const gb = geo.boundingBox;
     if (!gb) continue;
-    const cx = (gb.min.x + gb.max.x) / 2;
-    const cy = (gb.min.y + gb.max.y) / 2;
+    // capture the glyph's placed extents — geo.translate() mutates gb in place
+    const gx0 = gb.min.x;
+    const gx1 = gb.max.x;
+    const gy0 = gb.min.y;
+    const gy1 = gb.max.y;
+    const cx = (gx0 + gx1) / 2;
+    const cy = (gy0 + gy1) / 2;
     geo.translate(-cx, -cy, -(gb.min.z + gb.max.z) / 2); // centre on its origin
     geos.push(geo);
 
@@ -144,10 +149,10 @@ export async function createNameBlocks(
       sc: 1,
     });
 
-    minX = Math.min(minX, gb.min.x);
-    maxX = Math.max(maxX, gb.max.x);
-    minY = Math.min(minY, gb.min.y);
-    maxY = Math.max(maxY, gb.max.y);
+    minX = Math.min(minX, gx0);
+    maxX = Math.max(maxX, gx1);
+    minY = Math.min(minY, gy0);
+    maxY = Math.max(maxY, gy1);
   }
   if (!letters.length) return null;
 
@@ -186,8 +191,9 @@ export async function createNameBlocks(
   const cur = new THREE.Vector3();
 
   function layout() {
-    pivot.scale.setScalar(Math.min(vw * 0.64, 780) / nameW);
-    pivot.position.set(0, vh * 0.1, 0);
+    // fit the word to ~58% of the viewport, capped, with room for the lift
+    pivot.scale.setScalar(Math.min(vw * 0.58, 680) / nameW);
+    pivot.position.set(0, vh * 0.11, 0);
   }
 
   function setViewport(w: number, h: number) {

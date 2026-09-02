@@ -4,27 +4,32 @@ export function currentTheme(): Theme {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
-/**
- * Flip the theme, persist it, and iris the change in from `origin` (the control
- * that was clicked) — a disc of the outgoing sky colour that shrinks to nothing
- * where you clicked, revealing the new theme underneath.
- */
-export function toggleTheme(origin?: { x: number; y: number }) {
-  const root = document.documentElement;
-  const from = getComputedStyle(root).getPropertyValue("--color-sky").trim();
-  const next: Theme = currentTheme() === "dark" ? "light" : "dark";
-  root.dataset.theme = next;
+function persist(next: Theme) {
+  document.documentElement.dataset.theme = next;
   try {
     localStorage.setItem("theme", next);
   } catch {
     /* private mode — the choice just won't persist */
   }
   window.dispatchEvent(new Event("themechange"));
-  wipe(from, origin);
 }
 
-function wipe(from: string, origin?: { x: number; y: number }) {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+/**
+ * Flip the theme with an iris: a disc of the outgoing sky colour covers the
+ * whole page, the theme swaps underneath it (so nothing visibly jumps), then
+ * the disc collapses to the point you clicked, revealing the new theme.
+ */
+export function toggleTheme(origin?: { x: number; y: number }) {
+  const next: Theme = currentTheme() === "dark" ? "light" : "dark";
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    persist(next);
+    return;
+  }
+
+  const from = getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-sky")
+    .trim();
 
   let el = document.getElementById("theme-wipe");
   if (!el) {
@@ -39,12 +44,23 @@ function wipe(from: string, origin?: { x: number; y: number }) {
   el.style.setProperty("--wx", `${x}px`);
   el.style.setProperty("--wy", `${y}px`);
 
-  el.classList.remove("is-wiping");
-  void el.offsetWidth; // restart the animation
-  el.classList.add("is-wiping");
+  const wipe = el;
+  wipe.classList.remove("is-wiping");
+  wipe.classList.add("is-covering"); // cover everything, instantly
+  void wipe.offsetWidth;
+
+  requestAnimationFrame(() => {
+    persist(next); // swap the theme while fully hidden
+    requestAnimationFrame(() => {
+      wipe.classList.add("is-wiping"); // collapse the disc, revealing it
+    });
+  });
+
   const done = () => {
-    el?.classList.remove("is-wiping");
-    el?.removeEventListener("animationend", done);
+    clearTimeout(failsafe);
+    wipe.classList.remove("is-covering", "is-wiping");
+    wipe.removeEventListener("animationend", done);
   };
-  el.addEventListener("animationend", done);
+  const failsafe = window.setTimeout(done, 1400);
+  wipe.addEventListener("animationend", done);
 }

@@ -75,8 +75,6 @@ export function PathProgress() {
     let pitch = 0; // eased, radians — cursor nose-tilt when parked, yaw when landed
     let spin = 0; // free-running turntable angle once landed
     let curScale = 3.7; // eased, so the landed size doesn't pop
-    let landX = 0; // eased screen position (tracks live pos, glides in on landing)
-    let landY = 0;
     let facingLeft = false; // hysteretic: which way the route last committed
     let ptrX = 0; // cursor, −1..1 across the viewport (drives the parked plane)
     let ptrY = 0;
@@ -90,30 +88,30 @@ export function PathProgress() {
       const vh = window.innerHeight;
 
       const startY = vh * 0.62; // hovers here, below the name, until scroll
-      const flareY = h - vh * 0.5; // the descent eases into a level glide here
-      const restY = h - vh * 0.16; // and finally hovers here at the foot
+      const flareY = h - vh * 0.44; // the descent eases into a level glide here
+      const restY = h - vh * 0.22; // and finally hovers here, clear of the footer
       // swing nearly the full width, so the plane really crosses the screen
       const amp = Math.min(w * 0.42, w / 2 - 100);
 
       const pts: Array<{ x: number; y: number }> = [{ x: w / 2, y: startY }];
 
-      // one long, lazy S: ~2 wide swings, the amplitude only tapering near the
-      // very top and the landing, so the nose is never straight down for long
-      const STEPS = 12;
+      // one long, lazy S — three unhurried swings, amplitude only tapering at
+      // the very top and into the landing, so the nose is never straight down
+      const STEPS = 16;
       for (let k = 1; k <= STEPS; k++) {
         const f = k / STEPS;
         const y = startY + (flareY - startY) * f;
-        const env = Math.sin(f * Math.PI) ** 0.55; // full through the middle
-        const x = w / 2 + Math.sin(0.5 + f * Math.PI * 2.1) * amp * env;
+        const env = Math.sin(f * Math.PI) ** 0.5; // full through the middle
+        const x = w / 2 + Math.sin(0.4 + f * Math.PI * 2.9) * amp * env;
         pts.push({ x, y });
       }
 
-      // flare: bank round, level off, then a short horizontal run to the hover
-      // point — the last points share a y, so the final tangent is flat
-      pts.push({ x: w / 2 - amp * 0.55, y: flareY + (restY - flareY) * 0.5 });
-      pts.push({ x: w / 2 - amp * 0.25, y: restY });
-      pts.push({ x: w / 2 + amp * 0.12, y: restY });
-      pts.push({ x: w / 2 + amp * 0.4, y: restY });
+      // flare: bank round, level off, then settle to a centred hover point —
+      // the last two points share a y so the plane arrives (and holds) flat,
+      // right at the end of its own contrail
+      pts.push({ x: w / 2 - amp * 0.5, y: flareY + (restY - flareY) * 0.62 });
+      pts.push({ x: w / 2 - amp * 0.08, y: restY });
+      pts.push({ x: w / 2, y: restY });
 
       const d = smoothPath(pts);
       svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
@@ -135,7 +133,6 @@ export function PathProgress() {
     const update = (): boolean => {
       if (samples.length < 2) return false;
       const vh = window.innerHeight;
-      const w = wrap.clientWidth;
       const maxScroll = document.documentElement.scrollHeight - vh;
       const prog =
         maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
@@ -149,6 +146,7 @@ export function PathProgress() {
       const b = samples[i + 1];
       const t = b.y !== a.y ? (targetY - a.y) / (b.y - a.y) : 0;
       const pathX = a.x + (b.x - a.x) * t;
+      const pathY = a.y + (b.y - a.y) * t; // clamps to the last point at the foot
       const l = a.l + (b.l - a.l) * t;
 
       // path tangent — the nose points wherever the route is heading next
@@ -187,20 +185,17 @@ export function PathProgress() {
       const tScale = landed ? 2.1 : 3.7 - 1.9 * prog;
       curScale += (tScale - curScale) * 0.08;
 
-      // ---- screen position ------------------------------------------
-      let sx: number;
-      let sy: number;
-      if (landed) {
-        landX += (w / 2 - landX) * 0.06;
-        landY += (vh * 0.82 - landY) * 0.06;
-        sx = landX;
-        sy = landY + Math.sin(performance.now() * 0.0017) * 7; // hover bob
-      } else {
-        sx = pathX;
-        sy = targetY - window.scrollY + (flying ? 0 : ptrY * 24);
-        landX = sx; // keep synced so the landing glide starts from here
-        landY = sy;
-      }
+      // ---- screen position (the plane rides the path; at the foot it just
+      //      hovers where the contrail ends, with a gentle bob) -------------
+      const sx = pathX;
+      const sy =
+        pathY -
+        window.scrollY +
+        (landed
+          ? Math.sin(performance.now() * 0.0016) * 6
+          : flying
+            ? 0
+            : ptrY * 24);
 
       if (mesh) {
         mesh.update({
@@ -213,7 +208,7 @@ export function PathProgress() {
         });
       } else {
         plane.style.left = `${sx}px`;
-        plane.style.top = `${landed ? window.scrollY + sy : targetY}px`;
+        plane.style.top = `${window.scrollY + sy}px`;
         plane.style.transform =
           `translate(-50%, -50%) scale(${curScale.toFixed(3)}) ` +
           `perspective(560px) rotateX(13deg) ` +

@@ -400,16 +400,19 @@
     animation: spin 140s linear infinite;
   }
 
-  /* ---- theme wipe: an iris of the old sky colour collapsing to the click - */
+  /* ---- theme wipe: cover the whole page, swap under it, then iris out ---- */
   #theme-wipe {
     position: fixed;
     inset: 0;
-    z-index: 45;
+    z-index: 99; /* over everything but the loader, so nothing jumps ahead */
     pointer-events: none;
     clip-path: circle(0% at var(--wx, 50%) var(--wy, 22%));
   }
+  #theme-wipe.is-covering {
+    clip-path: circle(150% at var(--wx) var(--wy));
+  }
   #theme-wipe.is-wiping {
-    animation: theme-wipe 0.72s cubic-bezier(0.5, 0, 0.2, 1) both;
+    animation: theme-wipe 0.66s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
   @keyframes theme-wipe {
     from {
