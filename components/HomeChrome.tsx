@@ -61,7 +61,7 @@ export function HomeChrome() {
       root.toggleAttribute("data-scrolled", past);
       if (past !== scrolled) {
         scrolled = past;
-        if (past) name?.setPointer(0, 0); // settle before it fades
+        if (past) name?.setPointer(NaN, NaN); // let the letters settle before it fades
         kick();
       }
       ticking = false;
@@ -77,6 +77,10 @@ export function HomeChrome() {
         (e.clientX / window.innerWidth) * 2 - 1,
         (e.clientY / window.innerHeight) * 2 - 1,
       );
+      kick();
+    };
+    const onPointerLeave = () => {
+      name?.setPointer(NaN, NaN); // let the letters spring back
       kick();
     };
     const onResize = () => {
@@ -114,6 +118,10 @@ export function HomeChrome() {
           window.addEventListener("pointermove", onPointerMove, {
             passive: true,
           });
+          document.documentElement.addEventListener(
+            "pointerleave",
+            onPointerLeave,
+          );
           window.addEventListener("resize", onResize, { passive: true });
           window.addEventListener("themechange", onTheme);
         })
@@ -124,6 +132,10 @@ export function HomeChrome() {
       cancelled = true;
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
+      document.documentElement.removeEventListener(
+        "pointerleave",
+        onPointerLeave,
+      );
       window.removeEventListener("resize", onResize);
       window.removeEventListener("themechange", onTheme);
       if (raf) cancelAnimationFrame(raf);
