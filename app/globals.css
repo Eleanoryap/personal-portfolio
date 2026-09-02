@@ -689,24 +689,20 @@
     color: inherit;
     text-decoration: none;
   }
+  /* The hero name stays put and centred — it just crossfades to the small
+     corner name (.brand--corner) on scroll, it doesn't fly there. */
   .brand--home {
     font-size: clamp(1.7rem, 8vw, 5.25rem);
     letter-spacing: -0.015em;
-    /* a soft halo in the page colour rather than a plate, so nothing boxy
-       sweeps across the sky while the name travels to the corner */
     text-shadow:
       0 0 5px var(--color-sky),
       0 0 12px var(--color-sky),
       0 0 22px var(--color-sky),
       0 0 22px var(--color-sky);
     transform-origin: top left;
-    /* rest position = centred: shift the top-left corner by
-       (half viewport − corner offset − half element). */
     transform: translate(calc(50vw - 24px - 50%), calc(42svh - 22px - 50%));
     transition:
-      transform 0.8s cubic-bezier(0.6, 0, 0.15, 1),
-      font-size 0.8s cubic-bezier(0.6, 0, 0.15, 1),
-      opacity 0.55s ease,
+      opacity 0.45s ease,
       clip-path 0.8s cubic-bezier(0.6, 0, 0.15, 1);
   }
   /* Entrance: HomeChrome adds [data-intro] on mount (skipped for reduced
@@ -721,14 +717,22 @@
     clip-path: inset(-22% 0 -22% 0);
   }
   :root[data-scrolled] .brand--home {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* the small corner name — hidden until the hero collapses, then it fades in */
+  .brand--corner {
     font-size: 1.15rem;
-    /* settle into a padded plate in the corner (offset back so the text still
-       lands at the corner origin) */
-    transform: translate(-10px, -6px);
     padding: 6px 10px;
     background-color: var(--color-sky);
     border-radius: 3px;
-    text-shadow: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+  }
+  :root[data-scrolled] .brand--corner {
+    opacity: 1;
   }
   .brand--case {
     font-size: 1.1rem;
@@ -898,26 +902,26 @@
     position: absolute;
     left: -8%;
     right: -8%;
-    top: 48svh; /* the dense cloud sits over the departing hero, not the statement */
-    height: 74vh;
+    top: 52svh; /* a thick bank over the departing hero, above the statement */
+    height: 128vh;
     z-index: 5; /* over the content + plane, under the corner chrome */
     pointer-events: none;
     overflow: hidden;
     /* drifts up faster than the page — clears the statement quickly */
-    transform: translateY(calc(var(--p, 0) * -38vh));
+    transform: translateY(calc(var(--p, 0) * -44vh));
     -webkit-mask-image: linear-gradient(
       180deg,
       transparent,
-      #000 14%,
-      #000 52%,
-      transparent 84%
+      #000 10%,
+      #000 58%,
+      transparent 86%
     );
     mask-image: linear-gradient(
       180deg,
       transparent,
-      #000 14%,
-      #000 52%,
-      transparent 84%
+      #000 10%,
+      #000 58%,
+      transparent 86%
     );
     will-change: transform;
   }
@@ -946,7 +950,7 @@
     padding: 0 1.5rem;
   }
   .doc--hero {
-    padding-top: 100svh;
+    padding-top: 132svh;
   }
 
   .manifesto {

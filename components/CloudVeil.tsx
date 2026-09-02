@@ -5,18 +5,23 @@ import { useEffect, useRef } from "react";
 // a band of clouds straddling the hero → statement seam. Percent positions
 // within the band; s scales the cloud, lo/hi shade its underside/top.
 const PUFFS = [
-  { x: 2, y: 10, s: 1.5 },
-  { x: 40, y: 5, s: 1.9 },
-  { x: 74, y: 12, s: 1.6 },
-  { x: 20, y: 24, s: 2.2 },
-  { x: 58, y: 26, s: 2.0 },
-  { x: 86, y: 22, s: 1.5 },
-  { x: -6, y: 36, s: 1.9 },
-  { x: 34, y: 42, s: 2.3 },
-  { x: 66, y: 40, s: 1.8 },
-  { x: 4, y: 52, s: 1.7 },
-  { x: 48, y: 54, s: 2.1 },
-  { x: 80, y: 50, s: 1.6 },
+  { x: 0, y: 6, s: 1.8 },
+  { x: 34, y: 2, s: 2.2 },
+  { x: 68, y: 7, s: 1.9 },
+  { x: 92, y: 4, s: 1.6 },
+  { x: 14, y: 16, s: 2.4 },
+  { x: 50, y: 18, s: 2.6 },
+  { x: 82, y: 15, s: 2.0 },
+  { x: -8, y: 27, s: 2.2 },
+  { x: 30, y: 30, s: 2.7 },
+  { x: 62, y: 28, s: 2.3 },
+  { x: 90, y: 26, s: 1.8 },
+  { x: 6, y: 40, s: 2.4 },
+  { x: 44, y: 42, s: 2.8 },
+  { x: 76, y: 39, s: 2.1 },
+  { x: 20, y: 52, s: 2.3 },
+  { x: 56, y: 54, s: 2.5 },
+  { x: 86, y: 50, s: 1.9 },
 ];
 
 /**
@@ -39,7 +44,7 @@ export function CloudVeil() {
       const vh = window.innerHeight;
       const p = Math.max(
         0,
-        Math.min(1.4, (window.scrollY - vh * 0.15) / (vh * 1.1)),
+        Math.min(1.5, (window.scrollY - vh * 0.2) / (vh * 1.5)),
       );
       el.style.setProperty("--p", p.toFixed(3));
     };

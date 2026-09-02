@@ -150,6 +150,9 @@ export function HomeChrome() {
     <>
       <canvas className="brand-canvas" ref={nameCanvasRef} aria-hidden="true" />
       <h1 className="brand brand--home">{site.name}</h1>
+      <span className="brand brand--corner" aria-hidden="true">
+        {site.name}
+      </span>
 
       <div className="chrome chrome--home">
         <p className="chrome__fx chrome__fx--tl">

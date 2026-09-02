@@ -88,20 +88,26 @@ export function PathProgress() {
       const vh = window.innerHeight;
 
       const startY = vh * 0.62; // hovers here, below the name, until scroll
-      const flareY = h - vh * 0.4; // the descent eases into a long glide here
+      const flareY = h - vh * 0.46; // the descent eases into a long glide here
       const restY = h - vh * 0.22; // and finally hovers here, clear of the footer
-      const amp = Math.min(w * 0.38, w / 2 - 110);
+      const amp = Math.min(w * 0.44, w / 2 - 70);
 
-      const pts: Array<{ x: number; y: number }> = [{ x: w / 2, y: startY }];
+      // lead in with a wide, shallow sweep out to the right before the weave
+      const pts: Array<{ x: number; y: number }> = [
+        { x: w / 2, y: startY },
+        { x: w / 2 + amp * 0.85, y: startY + (flareY - startY) * 0.12 },
+      ];
 
-      // one big, smooth S — a low-frequency sine, densely sampled so it stays a
-      // rounded sweep (no sharp reversal), ending back at centre for the landing
-      const STEPS = 40;
+      // then a smooth multi-curve weave down the page — four half-swings,
+      // densely sampled so every reversal stays a rounded sweep, picking up
+      // from the rightward lead-in
+      const SWINGS = 4;
+      const STEPS = 56;
       for (let k = 1; k <= STEPS; k++) {
-        const f = k / STEPS;
+        const f = 0.12 + (k / STEPS) * 0.88;
         const y = startY + (flareY - startY) * f;
-        const env = 0.78 + 0.22 * Math.sin(f * Math.PI);
-        pts.push({ x: w / 2 + Math.sin(f * Math.PI * 2) * amp * env, y });
+        const env = 0.82 + 0.18 * Math.sin(f * Math.PI);
+        pts.push({ x: w / 2 + Math.sin(f * Math.PI * SWINGS) * amp * env, y });
       }
 
       // a short, gentle glide straight down the centre onto the touchdown —
